@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+html {
+    
+}
+body {
+    background-color: #f4f4f4;
+    font-family: Trueno;
+    
+}
+
+.start-navbar {
+    font-family: Fontspring;
+}
+
+.footer-inicio {
+    box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.082);
+}
+
+.successMessage {
+    animation: fadeOut 1s ease-in-out 4s forwards;
+}
+@font-face {
+    font-family: 'Trueno';
+    src: url('./assets/fonts/TruenoRoundBd.woff2') format('woff2'),
+        url('./assets/fonts/TruenoRoundBd.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Trueno';
+    src: url('./assets/fonts/TruenoRound.woff2') format('woff2'),
+        url('./assets/fonts/TruenoRound.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fontspring';
+    src: url('./assets/fonts/FONTSPRINGDEMO-FracktifSemiBoldRegular.woff2') format('woff2'),
+        url('./assets/fonts/FONTSPRINGDEMO-FracktifSemiBoldRegular.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@keyframes progressBar {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+
