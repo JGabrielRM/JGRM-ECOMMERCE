@@ -15,6 +15,7 @@ import PageNotFound from './JSX-Components/Page not Found/PageNotFound.jsx';
 import ProductPage from './JSX-Components/Product Page/ProductPage.jsx';
 import { CartProvider } from './JSX-Components/Services/CartContext.jsx';
 import Footer from './JSX-Components/Footer/Footer.jsx';
+import VerifyCode from './JSX-Components/Inicio de Sesión/VerifyCode';
 
 export default function App() {
     const location = useLocation();
@@ -58,7 +59,9 @@ export default function App() {
                         <Route path='/search' element={<Search />} />
                         <Route path='/register/exito' element={<RegistroExitoso />} />
                         <Route path='/producto/:id' element={<ProductPage />} />
+                        <Route path="/verify-code" element={<VerifyCode />} />
                         <Route path='*' element={<PageNotFound />} />
+                        
                     </Routes>
                     <Cart />
                     {showNavBar && <Footer />} {/* Mostrar Footer solo en rutas válidas */}

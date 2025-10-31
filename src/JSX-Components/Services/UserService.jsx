@@ -4,11 +4,23 @@ import axios from 'axios';
 const UserService = {
     registerUser: async (userData) => {
         try {
-            let API_URL = 'http://localhost:8080/register';
-            const response = await axios.post(API_URL, userData);
+            const response = await axios.post('http://localhost:8080/register', userData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
             return response.data;
         } catch (error) {
-            throw error.response ? error.response.data : error.message;
+            // Si hay datos en la respuesta a pesar del error 500, los devolvemos
+            if (error.response?.status === 500 && error.response?.data?.usuario) {
+                return error.response.data;
+            }
+            
+            throw {
+                response: error.response,
+                status: error.response?.status,
+                message: error.response?.data?.message || 'Error en el registro'
+            };
         }
     },
 
@@ -46,11 +58,33 @@ const UserService = {
         try {
             const API_URL = `http://localhost:8080/verify?token=${token}`;
             const response = await axios.get(API_URL);
-            return response.data; // el backend devuelve "Cuenta verificada correctamente"
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error.message;
+        }
+    },
+
+    verifyCode: async ({ code, email }) => {
+        try {
+            const API_URL = 'http://localhost:8080/register/verify-code';
+            const response = await axios.post(API_URL, { code, email });
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error.message;
+        }
+    },
+
+    resendVerificationCode: async ({ email }) => {
+        try {
+            const API_URL = 'http://localhost:8080/resend-verification-code';
+            const response = await axios.post(API_URL, { email });
+            return response.data;
         } catch (error) {
             throw error.response ? error.response.data : error.message;
         }
     }
 };
+
+    
 
 export default UserService;
