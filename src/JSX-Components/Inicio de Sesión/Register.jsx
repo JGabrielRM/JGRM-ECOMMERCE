@@ -153,6 +153,12 @@ export default function Register() {
                                     Crear cuenta
                                 </button>
                             </div>
+                            {error && (
+                        <StatusMessage 
+                            type="error"
+                            message={error}
+                        />
+                    )}
                         </form>
 
                         <p className="mt-10 text-center text-sm text-gray-500">
@@ -164,12 +170,7 @@ export default function Register() {
                     </div>
 
                     {/* Mensaje de error */}
-                    {error && (
-                        <StatusMessage 
-                            type="error"
-                            message={error}
-                        />
-                    )}
+                
                 </div>
             </div>
         </>

@@ -82,7 +82,31 @@ const UserService = {
         } catch (error) {
             throw error.response ? error.response.data : error.message;
         }
-    }
+    },
+
+        // Agregar estos métodos al objeto UserService
+        requestPasswordReset: async (email) => {
+        try {
+            const response = await axios.post('http://localhost:8080/auth/forgot-password', { 
+                email_usuario: email  // ✅ Cambio aquí
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    resetPassword: async (token, newPassword) => {  // ✅ Cambio en parámetros
+        try {
+            const response = await axios.post('http://localhost:8080/auth/reset-password', {
+                token: token,           // ✅ Token UUID (no code)
+                newPassword: newPassword // ✅ Correcto
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+},
 };
 
     

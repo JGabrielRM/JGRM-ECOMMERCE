@@ -16,12 +16,23 @@ import ProductPage from './JSX-Components/Product Page/ProductPage.jsx';
 import { CartProvider } from './JSX-Components/Services/CartContext.jsx';
 import Footer from './JSX-Components/Footer/Footer.jsx';
 import VerifyCode from './JSX-Components/Inicio de Sesión/VerifyCode';
+import ForgetPassword from './JSX-Components/Inicio de Sesión/ForgetPassword';
+import ResetPassword from './JSX-Components/Inicio de Sesión/ResetPassword';
 
 export default function App() {
     const location = useLocation();
 
     // Función para verificar si la ruta actual debe mostrar el NavBar y el Footer
     const isValidRoute = (pathname) => {
+
+        const excludedRoutes = [
+            '/log-in',
+            '/register',
+            '/forgot-password',
+            '/verify-code',
+            '/reset-password'
+        ];
+
         const validRoutes = [
             '/', 
             '/contacto', 
@@ -29,12 +40,23 @@ export default function App() {
             '/addEmployee', 
             '/search', 
             '/register/exito', 
-            '/producto/:id'
+            '/producto/:id',
+            '/reset-password',
         ];
 
+        if (excludedRoutes.includes(pathname)) {
+            return false;
+        }
         // Verificar rutas exactas
         if (validRoutes.includes(pathname)) {
             return true;
+        }
+        const resetPasswordPattern = /^\/reset-password(?:\?token=[\w-]+)?$/;
+        if (resetPasswordPattern.test(pathname)) {
+            return true;
+        }
+        if (pathname.startsWith('/reset-password')) {
+            return false;
         }
 
         // Verificar rutas dinámicas como /producto/:id
@@ -60,6 +82,8 @@ export default function App() {
                         <Route path='/register/exito' element={<RegistroExitoso />} />
                         <Route path='/producto/:id' element={<ProductPage />} />
                         <Route path="/verify-code" element={<VerifyCode />} />
+                        <Route path='/forgot-password' element={<ForgetPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path='*' element={<PageNotFound />} />
                         
                     </Routes>

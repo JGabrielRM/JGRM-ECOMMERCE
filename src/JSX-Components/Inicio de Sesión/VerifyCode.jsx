@@ -87,6 +87,26 @@ export default function VerifyCode() {
         );
     };
 
+    const maskEmail = (email) => {
+    if (!email) return '';
+    
+    const [username, domain] = email.split('@');
+    const domainParts = domain.split('.');
+    const mainDomain = domainParts[0];
+    const extension = domainParts.slice(1).join('.');
+    
+    // Asegurar que no intentemos hacer repeat con números negativos
+    const usernameLength = Math.max(0, username.length - 4);
+    const domainLength = Math.max(0, mainDomain.length - 4);
+    
+    // Mostrar solo los primeros 4 caracteres si hay suficientes, o todo si es más corto
+    const maskedUsername = username.slice(0, 4) + (usernameLength > 0 ? '*'.repeat(usernameLength) : '');
+    const maskedDomain = mainDomain.slice(0, 4) + (domainLength > 0 ? '*'.repeat(domainLength) : '');
+    
+    return `${maskedUsername}@${maskedDomain}.${extension}`;
+};
+
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <motion.div 
@@ -116,7 +136,7 @@ export default function VerifyCode() {
                         </h2>
                         <p className="text-lg text-gray-600 mb-10">
                             Hemos enviado un código de verificación a <br/>
-                            <span className="font-medium text-gray-900">{email}</span>
+                            <span className="font-medium text-gray-900">{email ? maskEmail(email) : ''}</span>
                         </p>
 
                         <form onSubmit={handleSubmit} className="mt-10 space-y-8">

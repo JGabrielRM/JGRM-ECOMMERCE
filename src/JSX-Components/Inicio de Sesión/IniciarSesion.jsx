@@ -15,62 +15,63 @@ export default function IniciarSesion() {
     const { login } = useContext(AuthContext);
 
     const handleLogin = async (e) => {
-        e.preventDefault();
-        setStatus({ type: '', message: '' });
-        setIsLoading(true);
-        setIsLoadingComplete(false);
+    e.preventDefault();
+    setStatus({ type: '', message: '' }); // Limpiar mensajes anteriores
+    setIsLoading(true);
+    setIsLoadingComplete(false);
 
-        try {
-            await login({ email_usuario: email, password_usuario: password });
-            setIsLoadingComplete(true);
-            setStatus({ 
-                type: 'success', 
-                message: '¡Inicio de sesión exitoso!' 
+    try {
+        await login({ email_usuario: email, password_usuario: password });
+        setIsLoadingComplete(true);
+        setStatus({ 
+            type: 'success', 
+            message: '¡Inicio de sesión exitoso!' 
+        });
+        
+        setTimeout(() => {
+            navigate('/');
+        }, 1500);
+    } catch (err) {
+        console.error('Error details:', err); // Para debugging
+        
+        if (err.response?.data?.error) {
+            switch (err.response.data.error) {
+                case 'USER_NOT_VERIFIED':
+                    setStatus({
+                        type: 'warning',
+                        message: 'Por favor verifica tu correo electrónico para iniciar sesión'
+                    });
+                    break;
+                case 'INVALID_CREDENTIALS':
+                    setStatus({
+                        type: 'error',
+                        message: 'Correo electrónico o contraseña incorrectos'
+                    });
+                    break;
+                case 'USER_DISABLED':
+                    setStatus({
+                        type: 'error',
+                        message: 'Tu cuenta ha sido desactivada. Contacta al soporte'
+                    });
+                    break;
+                default:
+                    setStatus({
+                        type: 'error',
+                        message: 'Error al iniciar sesión. Inténtalo de nuevo'
+                    });
+            }
+        } else {
+            setStatus({
+                type: 'error',
+                message: 'Error de conexión. Verifica tu internet'
             });
-            
-            // Esperar antes de redireccionar
-            setTimeout(() => {
-                navigate('/');
-            }, 1500);
-        } catch (err) {
-            if (err.response) {
-                switch (err.response.data.error) {
-                    case 'USER_NOT_VERIFIED':
-                        setStatus({
-                            type: 'warning',
-                            message: 'Por favor verifica tu correo electrónico para iniciar sesión'
-                        });
-                        break;
-                    case 'INVALID_CREDENTIALS':
-                        setStatus({
-                            type: 'error',
-                            message: 'Correo electrónico o contraseña incorrectos'
-                        });
-                        break;
-                    case 'USER_DISABLED':
-                        setStatus({
-                            type: 'error',
-                            message: 'Tu cuenta ha sido desactivada. Contacta al soporte'
-                        });
-                        break;
-                    default:
-                        setStatus({
-                            type: 'error',
-                            message: 'Error al iniciar sesión. Inténtalo de nuevo'
-                        });
-                }
-            } else {
-                setStatus({
-                    type: 'error',
-                    message: 'Error de conexión. Verifica tu internet'
-                });
-            }
-        } finally {
-            if (!isLoadingComplete) {
-                setIsLoading(false);
-            }
         }
-    };
+    } finally {
+        if (!isLoadingComplete) {
+            setIsLoading(false);
+        }
+    }
+};
 
     return (
         <>
@@ -111,14 +112,6 @@ export default function IniciarSesion() {
 
                     {/* Formulario */}
                     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                        {/* Mensaje de estado */}
-                        {status.type && status.message && (
-                            <StatusMessage 
-                                type={status.type} 
-                                message={status.message}
-                            />
-                        )}
-
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div>
                                 <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
@@ -175,6 +168,16 @@ export default function IniciarSesion() {
                                 </button>
                             </div>
                         </form>
+
+                        {/* Mover el StatusMessage fuera del formulario */}
+                        {status.type && status.message && (
+                            <div className="mt-4">
+                                <StatusMessage 
+                                    type={status.type} 
+                                    message={status.message}
+                                />
+                            </div>
+                        )}
 
                         <p className="mt-10 text-center text-sm/6 text-gray-500">
                             ¿No posees una cuenta?{' '}
