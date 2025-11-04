@@ -74,7 +74,7 @@ const UserService = {
         }
     },
 
-    resendVerificationCode: async ({ email }) => {
+    resendVerificationCode: async ({ email }) => {dfdffd
         try {
             const API_URL = 'http://localhost:8080/resend-verification-code';
             const response = await axios.post(API_URL, { email });
