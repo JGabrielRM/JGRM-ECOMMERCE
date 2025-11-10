@@ -16,15 +16,12 @@ export default function IniciarSesion() {
 
     const handleLogin = async (e) => {
     e.preventDefault();
-    setStatus({ type: '', message: '' }); // Limpiar mensajes anteriores
+    setStatus({ type: '', message: '' });
     setIsLoading(true);
     setIsLoadingComplete(false);
 
     try {
-        // Intentar iniciar sesión
         await login({ email_usuario: email, password_usuario: password });
-
-        // Si el login es exitoso
         setIsLoadingComplete(true);
         setStatus({
             type: 'success',
@@ -36,13 +33,40 @@ export default function IniciarSesion() {
         }, 1500);
 
     } catch (err) {
-        console.error('Error details:', err); // Muestra el error completo en consola
+        console.error('Error completo:', err);
+        console.error('Error message:', err.message);
+        console.error('Error response:', err.response);
 
-        const statusCode = err.response?.status;
-        const errorData = err.response?.data;
+        // Detener la pantalla de carga
+        setIsLoading(false);
 
-        if (errorData?.error) {
-            const { error, message } = errorData;
+        // Manejo de errores mejorado
+        if (err.message) {
+            // Si el error tiene un mensaje directo (del catch en AuthContext)
+            if (err.message.includes('Credenciales inválidas')) {
+                setStatus({
+                    type: 'error',
+                    message: 'Correo electrónico o contraseña incorrectos'
+                });
+            } else if (err.message.includes('Usuario no verificado') || err.message.includes('verifica tu correo')) {
+                setStatus({
+                    type: 'warning',
+                    message: 'Por favor verifica tu correo electrónico antes de iniciar sesión'
+                });
+            } else if (err.message.includes('no encontrado')) {
+                setStatus({
+                    type: 'error',
+                    message: 'El usuario no existe en el sistema'
+                });
+            } else {
+                setStatus({
+                    type: 'error',
+                    message: err.message
+                });
+            }
+        } else if (err.response?.data?.error) {
+            // Si tiene la estructura de error del backend
+            const { error, message } = err.response.data;
 
             switch (error) {
                 case 'USER_NOT_VERIFIED':
@@ -51,52 +75,40 @@ export default function IniciarSesion() {
                         message: message || 'Por favor verifica tu correo electrónico antes de iniciar sesión'
                     });
                     break;
-
                 case 'INVALID_CREDENTIALS':
                     setStatus({
                         type: 'error',
                         message: message || 'Correo electrónico o contraseña incorrectos'
                     });
                     break;
-
                 case 'USER_NOT_FOUND':
                     setStatus({
                         type: 'error',
                         message: message || 'El usuario no existe en el sistema'
                     });
                     break;
-
-                case 'INTERNAL_SERVER_ERROR':
-                    setStatus({
-                        type: 'error',
-                        message: 'Error interno del servidor. Intenta nuevamente más tarde'
-                    });
-                    break;
-
                 default:
                     setStatus({
                         type: 'error',
                         message: message || 'Error desconocido. Inténtalo nuevamente'
                     });
             }
-
-        } else if (statusCode === 403) {
+        } else if (err.response?.status === 401) {
+            setStatus({
+                type: 'error',
+                message: 'Credenciales inválidas'
+            });
+        } else if (err.response?.status === 403) {
             setStatus({
                 type: 'warning',
                 message: 'Acceso denegado. Tu cuenta podría no estar verificada'
             });
         } else {
-            // Si no hay respuesta del servidor (timeout, CORS, o backend caído)
+            // Error de conexión
             setStatus({
                 type: 'error',
                 message: 'Error de conexión. Verifica tu red o que el servidor esté en ejecución'
             });
-        }
-
-    } finally {
-        // Si no se completó exitosamente el inicio de sesión
-        if (!isLoadingComplete) {
-            setIsLoading(false);
         }
     }
 };

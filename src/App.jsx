@@ -19,6 +19,9 @@ import VerifyCode from './JSX-Components/Inicio de Sesión/VerifyCode';
 import ForgetPassword from './JSX-Components/Inicio de Sesión/ForgetPassword';
 import ResetPassword from './JSX-Components/Inicio de Sesión/ResetPassword';
 import { useAuth } from './JSX-Components/Services/AuthContext';
+import Checkout from './JSX-Components/Checkout/Checkout';
+import LoadingScreen from './JSX-Components/Pantalla de Carga/LoadingScreen';
+
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -95,6 +98,7 @@ export default function App() {
                         <Route path="/verify-code" element={<VerifyCode />} />
                         <Route path='/forgot-password' element={<ForgetPassword />} />
                         <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
                         <Route path='*' element={<PageNotFound />} />
                         
                     </Routes>

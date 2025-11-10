@@ -1,61 +1,70 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ProductServices from '../Services/ProductServices';
-import ProductCard from '../ProductCard'; // Importar el ProductCard original
+import ProductCard from '../ProductCard';
 import { useCart } from '../Services/CartContext.jsx';
 import AuthContext from '../Services/AuthContext.jsx';
+import ProductReviews from './ProductReviews';
 
-const BASE_IMAGE_URL = "http://localhost:8080/uploads/"; // URL base para imágenes
+const BASE_IMAGE_URL = "http://localhost:8080/uploads/";
 
 export default function ProductPage() {
-    const { id } = useParams(); // Obtén el id del producto desde la URL
-    const { addToCart } = useCart(); // Usar la función para agregar al carrito
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { addToCart, setIsOpen } = useCart();
     const { isAuthenticated } = useContext(AuthContext);
     const [product, setProduct] = useState(null);
-    const [relatedProducts, setRelatedProducts] = useState([]); // Estado para productos relacionados
+    const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
     const shuffleArray = (array) => {
         return array
-            .map((item) => ({ ...item, sort: Math.random() })) // Agregar un valor aleatorio
-            .sort((a, b) => a.sort - b.sort) // Ordenar por el valor aleatorio
+            .map((item) => ({ ...item, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
             .map((item) => {
-                delete item.sort; // Eliminar el valor aleatorio después de ordenar
+                delete item.sort;
                 return item;
             });
     };
 
     const handleAddToCart = (product) => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated()) {
+            setIsOpen(true);
             return;
         }
-        addToCart(product); // Llama a la función addToCart del contexto
+        addToCart(product);
+    };
+
+    const handleBuyNow = () => {
+        if (!isAuthenticated()) {
+            setIsOpen(true);
+            return;
+        }
+        addToCart(product);
+        navigate('/checkout');
     };
 
     useEffect(() => {
-        // Llama al servicio para obtener los datos del producto
         const fetchProduct = async () => {
             try {
-                const response = await ProductServices.getAllProducts(); // Obtén todos los productos
-                const selectedProduct = response.data.find((p) => p.idProduct === parseInt(id)); // Busca el producto por ID
+                const response = await ProductServices.getAllProducts();
+                const selectedProduct = response.data.find((p) => p.idProduct === parseInt(id));
                 if (selectedProduct) {
                     selectedProduct.imageProduct = `${BASE_IMAGE_URL}${selectedProduct.imageProduct}`;
                     setProduct(selectedProduct);
 
-                    // Filtrar productos relacionados (por categoría o subcategoría)
                     const related = response.data
                         .filter((p) => p.idProduct !== parseInt(id))
                         .map((p) => ({
                             ...p,
-                            imageProduct: `${BASE_IMAGE_URL}${p.imageProduct}`, // Construir URL completa para las imágenes relacionadas
+                            imageProduct: `${BASE_IMAGE_URL}${p.imageProduct}`,
                         }));
 
-                    // Mezclar productos relacionados y limitar a 4
                     const shuffledRelated = shuffleArray(related).slice(0, 4);
                     setRelatedProducts(shuffledRelated);
                 } else {
-                    setError(true); // Marca error si no se encuentra el producto
+                    setError(true);
                 }
             } catch (err) {
                 console.error('Error al obtener el producto:', err);
@@ -84,54 +93,66 @@ export default function ProductPage() {
         );
     }
 
+    const { imageProduct: imageUrl, productName, productDescription, categoriaProduct, subCategoriaProduct, productPrice } = product;
+
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 mb-25">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Galería de imágenes */}
-                <div className="col-span-2">
-                    <div className="flex flex-col gap-4">
-                        <img
-                            src={product.imageProduct}
-                            alt={product.productName}
-                            className="w-full max-h-[470px] object-contain mx-auto outline-2 outline-gray-300 rounded-lg shadow-md"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Imagen del producto sin zoom */}
+                <div className="space-y-4">
+                    <div className="h-96 bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
+                        <img 
+                            src={imageUrl} 
+                            alt={productName}
+                            className="w-full h-full object-contain p-4"
                         />
+                    </div>
+                    
+                    {/* Miniaturas */}
+                    <div className="flex space-x-2">
+                        <div className="h-20 w-20 bg-gray-300 rounded-lg cursor-pointer hover:opacity-80 border border-gray-400">
+                            <img src={imageUrl} alt="Thumbnail 1" className="w-full h-full object-contain rounded-lg" />
+                        </div>
                     </div>
                 </div>
 
-                {/* Detalles del producto */}
-                <div className="col-span-2 md:col-span-1 flex flex-col justify-between">
+                {/* Información del producto */}
+                <div className="space-y-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-800 mb-4">{product.productName}</h1>
-                        <p className="text-lg text-gray-600 mb-6">{product.productDescription}</p>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-4">{productName}</h1>
+                        <p className="text-lg text-gray-600 mb-6">{productDescription}</p>
                         <p className="text-sm text-gray-500">
-                            Categoría: <span className="font-medium">{product.categoriaProduct}</span>
+                            Categoría: <span className="font-medium">{categoriaProduct}</span>
                         </p>
-                        {product.subCategoriaProduct && (
+                        {subCategoriaProduct && (
                             <p className="text-sm text-gray-500">
-                                Subcategoría: <span className="font-medium">{product.subCategoriaProduct}</span>
+                                Subcategoría: <span className="font-medium">{subCategoriaProduct}</span>
                             </p>
                         )}
                     </div>
 
                     {/* Contenedor de precio y acciones */}
-                    <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md mt-6 border border-gray-200">
                         <p className="text-4xl font-semibold text-lime-600 mb-4">
                             {new Intl.NumberFormat('es-CO', {
                                 style: 'currency',
                                 currency: 'COP',
-                            }).format(product.productPrice)}
+                            }).format(productPrice)}
                         </p>
-                        <p className="text-sm text-gray-500 mb-4">Envío gratis a todo el país</p>
-                        <div className="flex flex-col gap-4">
+                        <p className="text-sm text-gray-500 mb-6 flex items-center space-x-1">
+                            <span>✓</span>
+                            <span>Envío gratis a todo el país</span>
+                        </p>
+                        <div className="flex flex-col gap-3">
                             <button
-                                className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors duration-200"
-                                onClick={() => alert('Compra realizada')}
+                                className="w-full bg-slate-800 text-white py-3 px-4 rounded-md hover:bg-slate-900 transition-all duration-200 font-semibold transform hover:scale-105 active:scale-95"
+                                onClick={handleBuyNow}
                             >
                                 Comprar ahora
                             </button>
                             <button
-                                className="bg-lime-600 text-white py-2 px-4 rounded-md hover:bg-lime-700 transition-colors duration-200"
-                                onClick={() => handleAddToCart(product)} // Llama a addToCart
+                                className="w-full bg-lime-600 text-white py-3 px-4 rounded-md hover:bg-lime-700 transition-all duration-200 font-semibold transform hover:scale-105 active:scale-95"
+                                onClick={() => handleAddToCart(product)}
                             >
                                 Agregar al carrito
                             </button>
@@ -159,6 +180,9 @@ export default function ProductPage() {
                     ))}
                 </div>
             </div>
+
+            {/* Apartado de opiniones */}
+            <ProductReviews productId={id} />
         </div>
     );
 }

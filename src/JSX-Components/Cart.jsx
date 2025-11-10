@@ -1,174 +1,242 @@
-import React from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useCart } from './Services/CartContext.jsx';
-import { useContext } from 'react';
-import AuthContext from './Services/AuthContext.jsx';
+import React, { useContext, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaTimes, FaTrash, FaShoppingCart } from 'react-icons/fa';
+import { useCart } from './Services/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa'; // Importar íconos
+import AuthContext from './Services/AuthContext';
 
 export default function Cart() {
-    const { cart, isCartOpen, closeCart, addToCart, removeFromCart, clearCart } = useCart();
-    const { isAuthenticated } = useContext(AuthContext); // Verificar si el usuario está autenticado
+    const { cartItems, removeFromCart, clearCart, isOpen, setIsOpen, updateQuantity } = useCart();
+    const { isAuthenticated } = useContext(AuthContext);
+    const [hoveredItemId, setHoveredItemId] = useState(null);
     const navigate = useNavigate();
 
-    const calculateSubtotal = () => {
-        return cart.reduce((total, product) => total + product.productPrice * product.quantity, 0);
+    const totalPrice = cartItems.reduce((total, item) => total + (item.productPrice * item.quantity), 0);
+
+    const handleCheckout = () => {
+        setIsOpen(false);
+        navigate('/checkout');
+    };
+
+    const handleLoginRedirect = () => {
+        setIsOpen(false);
+        navigate('/log-in');
     };
 
     return (
-        <Transition show={isCartOpen} as={React.Fragment}>
-            <Dialog open={isCartOpen} onClose={closeCart} className="relative z-50">
-                {/* Fondo con animación */}
-                <Transition.Child
-                    as={React.Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-20"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-20"
-                    leaveTo="opacity-0"
-                >
-                    <div className="fixed inset-0 bg-black opacity-10" />
-                </Transition.Child>
+        <>
+            {/* Overlay oscuro - cubre TODO incluyendo navbar */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsOpen(false)}
+                        className="fixed inset-0 bg-black/50 z-40"
+                        style={{ top: 0, left: 0 }}
+                    />
+                )}
+            </AnimatePresence>
 
-                {/* Panel del carrito */}
-                <div className="fixed inset-0 overflow-hidden">
-                    <div className="absolute inset-0 overflow-hidden">
-                        <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-                            <Transition.Child
-                                as={React.Fragment}
-                                enter="transform transition ease-out duration-300"
-                                enterFrom="translate-x-full"
-                                enterTo="translate-x-0"
-                                leave="transform transition ease-in duration-200"
-                                leaveFrom="translate-x-0"
-                                leaveTo="translate-x-full"
+            {/* Panel del carrito */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                        className="fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
+                    >
+                        {/* Header del carrito */}
+                        <div className="bg-lime-600 text-white p-6 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <FaShoppingCart className="h-6 w-6" />
+                                <h2 className="text-2xl font-bold">Tu carrito</h2>
+                            </div>
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setIsOpen(false)}
+                                className="p-2 hover:bg-lime-700 rounded-full transition-colors"
                             >
-                                <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
-                                    <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
-                                        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-                                            <div className="flex items-start justify-between">
-                                                <Dialog.Title className="text-lg font-medium text-gray-900">
-                                                    Carrito de compras
-                                                </Dialog.Title>
-                                                <button
-                                                    type="button"
-                                                    className="relative -m-2 p-2 text-gray-400 hover:text-gray-500"
-                                                    onClick={closeCart}
-                                                >
-                                                    <span className="sr-only">Cerrar panel</span>
-                                                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                                                </button>
-                                            </div>
-
-                                            <div className="mt-8">
-                                                {!isAuthenticated ? (
-                                                    // Mostrar mensaje si no está autenticado
-                                                    <div className="text-center">
-                                                        <p className="text-gray-500 mb-4">
-                                                            Debes iniciar sesión para ver tu carrito.
-                                                        </p>
-                                                        <button
-                                                            onClick={() => {
-                                                                closeCart();
-                                                                navigate('/log-in');
-                                                            }}
-                                                            className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition"
-                                                        >
-                                                            Iniciar sesión
-                                                        </button>
-                                                    </div>
-                                                ) : cart.length > 0 ? (
-                                                    <ul className="-my-6 divide-y divide-gray-200">
-                                                        {cart.map((product) => (
-                                                            <li key={product.idProduct} className="flex py-6">
-                                                                <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                                                                    <img
-                                                                        src={product.imageProduct}
-                                                                        alt={product.productName}
-                                                                        className="h-full w-full object-contain"
-                                                                    />
-                                                                </div>
-                                                                <div className="ml-4 flex flex-1 flex-col">
-                                                                    <div>
-                                                                        <div className="flex justify-between text-base font-medium text-gray-900">
-                                                                            <h3>{product.productName}</h3>
-                                                                            <p className="ml-4">
-                                                                                {new Intl.NumberFormat('es-CO', {
-                                                                                    style: 'currency',
-                                                                                    currency: 'COP',
-                                                                                }).format(product.productPrice)}
-                                                                            </p>
-                                                                        </div>
-                                                                        <p className="mt-1 text-sm text-gray-500">
-                                                                            {product.categoriaProduct}
-                                                                        </p>
-                                                                    </div>
-                                                                    <div className="flex items-center justify-between mt-4">
-                                                                        <div className="flex items-center space-x-4">
-                                                                            {/* Botón para agregar más cantidad */}
-                                                                            <button
-                                                                                onClick={() => addToCart(product)}
-                                                                                className="p-2 bg-lime-500 text-white rounded-full hover:bg-lime-600"
-                                                                            >
-                                                                                <FaPlus />
-                                                                            </button>
-                                                                            {/* Mostrar cantidad */}
-                                                                            <span className="text-gray-700 font-medium">
-                                                                                {product.quantity}
-                                                                            </span>
-                                                                            {/* Botón para eliminar una unidad */}
-                                                                            <button
-                                                                                onClick={() => removeFromCart(product.idProduct)}
-                                                                                className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                                                            >
-                                                                                <FaMinus />
-                                                                            </button>
-                                                                        </div>
-                                                                        {/* Botón para eliminar todos los productos */}
-                                                                        <button
-                                                                            onClick={() => clearCart(product.idProduct)}
-                                                                            className="p-2 bg-gray-500 text-white rounded-full hover:bg-gray-600"
-                                                                        >
-                                                                            <FaTrash />
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-center text-gray-500">Tu carrito está vacío.</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {isAuthenticated && cart.length > 0 && (
-                                            <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
-                                                <div className="flex justify-between text-base font-medium text-gray-900">
-                                                    <p>Subtotal</p>
-                                                    <p>
-                                                        {new Intl.NumberFormat('es-CO', {
-                                                            style: 'currency',
-                                                            currency: 'COP',
-                                                        }).format(calculateSubtotal())}
-                                                    </p>
-                                                </div>
-                                                <div className="mt-6">
-                                                    <button className="flex items-center justify-center rounded-md border border-transparent bg-gray-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-gray-700">
-                                                        Finalizar compra
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </Dialog.Panel>
-                            </Transition.Child>
+                                <FaTimes className="h-6 w-6" />
+                            </motion.button>
                         </div>
-                    </div>
-                </div>
-            </Dialog>
-        </Transition>
+
+                        {/* Contenido del carrito */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                            {!isAuthenticated() ? (
+                                // Mensaje de no autenticado
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex flex-col items-center justify-center h-full text-center space-y-6"
+                                >
+                                    <FaShoppingCart className="h-16 w-16 text-gray-300" />
+                                    <div className="space-y-3">
+                                        <p className="text-lg font-light text-gray-800">
+                                            Inicia sesión para añadir un producto.
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            ) : cartItems.length === 0 ? (
+                                // Carrito vacío autenticado
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex flex-col items-center justify-center h-full text-gray-500"
+                                >
+                                    <FaShoppingCart className="h-12 w-12 mb-4 text-gray-300" />
+                                    <p className="text-lg font-semibold">Tu carrito está vacío</p>
+                                    <p className="text-sm mt-2">¡Agrega productos para comenzar!</p>
+                                </motion.div>
+                            ) : (
+                                // Items en el carrito
+                                <AnimatePresence mode="popLayout">
+                                    {cartItems.map((item) => (
+                                        <motion.div
+                                            key={item.idProduct}
+                                            layout
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, x: 100 }}
+                                            onMouseEnter={() => setHoveredItemId(item.idProduct)}
+                                            onMouseLeave={() => setHoveredItemId(null)}
+                                            className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-lime-400 transition-colors"
+                                        >
+                                            <div className="flex gap-3">
+                                                {/* Imagen */}
+                                                <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img
+                                                        src={item.imageProduct}
+                                                        alt={item.productName}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+
+                                                {/* Información */}
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-sm font-semibold text-gray-800 truncate">
+                                                        {item.productName}
+                                                    </h3>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        ${new Intl.NumberFormat('es-CO').format(item.productPrice)}
+                                                    </p>
+
+                                                    {/* Controles de cantidad */}
+                                                    <div className="flex items-center gap-2 mt-3 bg-white rounded border border-gray-300">
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => updateQuantity(item.idProduct, item.quantity - 1)}
+                                                            className="p-1 text-gray-600 hover:text-gray-800"
+                                                        >
+                                                            −
+                                                        </motion.button>
+                                                        <span className="text-xs font-semibold w-6 text-center">
+                                                            {item.quantity}
+                                                        </span>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => updateQuantity(item.idProduct, item.quantity + 1)}
+                                                            className="p-1 text-gray-600 hover:text-gray-800"
+                                                        >
+                                                            +
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Botón eliminar */}
+                                                <motion.button
+                                                    whileHover={{ scale: 1.1 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    onClick={() => removeFromCart(item.idProduct)}
+                                                    className={`p-2 rounded transition-colors ${
+                                                        hoveredItemId === item.idProduct
+                                                            ? 'bg-red-100 text-red-600'
+                                                            : 'text-gray-400 hover:text-red-600'
+                                                    }`}
+                                                >
+                                                    <FaTrash className="h-4 w-4" />
+                                                </motion.button>
+                                            </div>
+
+                                            {/* Subtotal */}
+                                            <div className="mt-2 pt-2 border-t border-gray-200">
+                                                <p className="text-xs text-gray-600">
+                                                    Subtotal: ${new Intl.NumberFormat('es-CO').format(item.productPrice * item.quantity)}
+                                                </p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            )}
+                        </div>
+
+                        {/* Footer del carrito */}
+                        {!isAuthenticated() ? (
+                            // Botón de login
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="border-t border-gray-200 p-6 bg-gray-50"
+                            >
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handleLoginRedirect}
+                                    className="w-full bg-lime-600 text-white font-semibold py-3 rounded-lg hover:bg-lime-700 transition-all duration-200"
+                                >
+                                    Ir a iniciar sesión
+                                </motion.button>
+                            </motion.div>
+                        ) : cartItems.length > 0 ? (
+                            // Botones de checkout
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="border-t border-gray-200 p-6 space-y-4 bg-gray-50"
+                            >
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm text-gray-600">
+                                        <span>Subtotal</span>
+                                        <span>${new Intl.NumberFormat('es-CO').format(totalPrice)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-gray-600">
+                                        <span>Envío</span>
+                                        <span className="text-green-600 font-semibold">Gratis</span>
+                                    </div>
+                                    <div className="flex justify-between text-lg font-bold text-gray-800 pt-2 border-t">
+                                        <span>Total</span>
+                                        <span className="text-lime-600">${new Intl.NumberFormat('es-CO').format(totalPrice)}</span>
+                                    </div>
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handleCheckout}
+                                    className="w-full bg-lime-600 text-white font-semibold py-3 rounded-lg hover:bg-lime-700 transition-all duration-200"
+                                >
+                                    Ir al checkout
+                                </motion.button>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => clearCart()}
+                                    className="w-full text-red-600 font-semibold py-2 rounded-lg hover:bg-red-50 transition-colors"
+                                >
+                                    Limpiar carrito
+                                </motion.button>
+                            </motion.div>
+                        ) : null}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
     );
 }

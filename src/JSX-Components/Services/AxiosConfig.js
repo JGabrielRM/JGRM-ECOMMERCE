@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080' // Tu URL del backend
+    baseURL: 'http://localhost:8080'
 });
 
 // Interceptor para añadir el token a todas las solicitudes
@@ -24,7 +24,7 @@ axiosInstance.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/log-in';
+            // No redirigir aquí automáticamente
         }
         return Promise.reject(error);
     }

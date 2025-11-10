@@ -3,7 +3,11 @@ import axiosInstance from './AxiosConfig';
 const UserService = {
     registerUser: async (userData) => {
         try {
-            const response = await axiosInstance.post('/auth/register', userData);
+            const response = await axiosInstance.post('/register', {
+                email_usuario: userData.email_usuario,
+                nombre_usuario: userData.nombre_usuario,
+                password_usuario: userData.password_usuario
+            });
             return response.data;
         } catch (error) {
             throw error;
@@ -12,7 +16,10 @@ const UserService = {
 
     verifyCode: async (data) => {
         try {
-            const response = await axiosInstance.post('/auth/verify-code', data);
+            const response = await axiosInstance.post('/register/verify-code', {
+                email: data.email,
+                code: data.code
+            });
             return response.data;
         } catch (error) {
             throw error;
@@ -21,7 +28,9 @@ const UserService = {
 
     requestPasswordReset: async (email) => {
         try {
-            const response = await axiosInstance.post('/auth/forgot-password', { email });
+            const response = await axiosInstance.post('/auth/forgot-password', { 
+                email_usuario: email 
+            });
             return response.data;
         } catch (error) {
             throw error;

@@ -20,10 +20,12 @@ export const AuthProvider = ({ children }) => {
     // Verificar si el token es válido
     const checkAuth = async () => {
         try {
-            const response = await axiosInstance.get('/auth/verify');
+            const response = await axiosInstance.get('/auth/user');
             setUser(response.data);
         } catch (error) {
+            console.error('Error verificando autenticación:', error);
             localStorage.removeItem('token');
+            setUser(null);
         } finally {
             setLoading(false);
         }
@@ -35,7 +37,13 @@ export const AuthProvider = ({ children }) => {
             
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
-                setUser(response.data.user);
+                
+                // Guardar datos del usuario
+                setUser({
+                    email_usuario: response.data.email,
+                    nombre_usuario: response.data.nombre,
+                });
+                
                 return response.data;
             }
         } catch (error) {
@@ -43,6 +51,8 @@ export const AuthProvider = ({ children }) => {
                 throw new Error('Credenciales inválidas');
             } else if (error.response?.status === 403) {
                 throw new Error('Usuario no verificado');
+            } else if (error.response?.data?.message) {
+                throw new Error(error.response.data.message);
             } else {
                 throw new Error('Error en el servidor');
             }
@@ -55,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const isAuthenticated = () => {
-        return !!localStorage.getItem('token');
+        return !!user && !!localStorage.getItem('token');
     };
 
     return (
@@ -68,7 +78,7 @@ export const AuthProvider = ({ children }) => {
                 loading 
             }}
         >
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };
