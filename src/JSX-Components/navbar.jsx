@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from "../assets/logo behance.png";
 import { CiShoppingBasket, CiSearch, CiLogin } from "react-icons/ci";
 import { BsHouseDoor } from "react-icons/bs";
@@ -11,16 +11,24 @@ import AuthContext from './Services/AuthContext';
 import { useCart } from './Services/CartContext.jsx'; // Importar el contexto del carrito
 
 const PascalCase = (str) => {
+    if (!str) return ''; // Manejar el caso cuando str es undefined o null
     return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
 export function NavBar() {
-    const { user, isAuthenticated, logout } = useContext(AuthContext); // Usar el contexto de autenticación
-    const { getTotalItems, openCart } = useCart(); // Usar la función para abrir el carrito
-    const [menuOpen, setMenuOpen] = useState(false); // Estado para controlar el menú desplegable
+    const navigate = useNavigate();
+    const { user, isAuthenticated, logout } = useContext(AuthContext);
+    const { getTotalItems, openCart } = useCart();
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
+    };
+
+    const handleLogout = () => {
+        logout();
+        setMenuOpen(false);
+        navigate('/log-in');
     };
 
     return (
@@ -75,7 +83,7 @@ export function NavBar() {
                         // Mostrar ícono de usuario y menú personalizado si está autenticado
                         <li className='relative px-5 shadow rounded-2xl flex items-center space-x-2 transform active:scale-95 hover:scale-105 ease-in-out duration-300'>
                             <FaUserCircle className='h-10 w-auto text-zinc-800' />
-                            <span className='text-zinc-800'>{PascalCase(user?.name)}</span>
+                            <span className='text-zinc-800'>{PascalCase(user?.nombre_usuario || '')}</span>
                             <button
                                 onClick={toggleMenu}
                                 className="flex items-center text-zinc-800 focus:outline-none"
@@ -86,7 +94,7 @@ export function NavBar() {
                                 <ul className="absolute right-0 mt-20 w-40 bg-white border border-gray-300 rounded-md shadow-lg">
                                     <li
                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                                        onClick={logout}
+                                        onClick={handleLogout}
                                     >
                                         Cerrar sesión
                                     </li>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { Inicio } from "./JSX-Components/Pagina-inicio/Inicio.jsx";
 import { Contacto } from './JSX-Components/Contacto/Contacto.jsx';
 import { NavBar } from './JSX-Components/navbar.jsx';
@@ -18,6 +18,17 @@ import Footer from './JSX-Components/Footer/Footer.jsx';
 import VerifyCode from './JSX-Components/Inicio de Sesión/VerifyCode';
 import ForgetPassword from './JSX-Components/Inicio de Sesión/ForgetPassword';
 import ResetPassword from './JSX-Components/Inicio de Sesión/ResetPassword';
+import { useAuth } from './JSX-Components/Services/AuthContext';
+
+const PrivateRoute = ({ children }) => {
+    const { isAuthenticated, loading } = useAuth();
+    
+    if (loading) {
+        return <LoadingScreen />;
+    }
+    
+    return isAuthenticated() ? children : <Navigate to="/log-in" />;
+};
 
 export default function App() {
     const location = useLocation();

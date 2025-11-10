@@ -1,83 +1,84 @@
-import React, { createContext, useState, useEffect} from "react";
-import UserService from "../Services/UserService";
-import { useCart } from "./CartContext.jsx";
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import axiosInstance from './AxiosConfig';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const { setCart, clearCart } = useCart();
-    const navigate = useNavigate(); // Importar funciones del carrito
 
-    // Cargar usuario desde el backend o localStorage al iniciar la app
+    // Verificar token al cargar la aplicación
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const storedUser = localStorage.getItem("user");
-                if (storedUser) {
-                    const userData = JSON.parse(storedUser);
-                    setUser(userData);
-                    setIsAuthenticated(true);
-
-                    // Cargar carrito del usuario desde localStorage
-                    const savedCart = localStorage.getItem(`cart_${userData.name}`);
-                    if (savedCart) {
-                        setCart(JSON.parse(savedCart));
-                    }
-                }
-            } catch (error) {
-                console.error("Error al obtener usuario:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUser();
+        const token = localStorage.getItem('token');
+        if (token) {
+            checkAuth();
+        } else {
+            setLoading(false);
+        }
     }, []);
 
-    // Función de inicio de sesión
-    const login = async (credentials) => {
+    // Verificar si el token es válido
+    const checkAuth = async () => {
         try {
-            const response = await UserService.loginUser(credentials);
-            if (response.usuario) {
-                const userData = { name: response.usuario };
-                setUser(userData);
-                setIsAuthenticated(true);
-                localStorage.setItem("user", JSON.stringify(userData));
-
-                // Cargar carrito del usuario desde localStorage
-                const savedCart = localStorage.getItem(`cart_${userData.name}`);
-                if (savedCart) {
-                    setCart(JSON.parse(savedCart));
-                }
-            }
+            const response = await axiosInstance.get('/auth/verify');
+            setUser(response.data);
         } catch (error) {
-            console.error("Error en login:", error);
-            throw error;
+            localStorage.removeItem('token');
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Función de cierre de sesión
-    const logout = async () => {
+    const login = async (credentials) => {
         try {
-            await UserService.logoutUser();
-            setUser(null);
-            setIsAuthenticated(false);
-            localStorage.removeItem("user"); // Eliminar usuario del localStorage
-            clearCart();
-            navigate("/log-in") // Limpiar el carrito al cerrar sesión
+            const response = await axiosInstance.post('/auth/login', credentials);
+            
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                setUser(response.data.user);
+                return response.data;
+            }
         } catch (error) {
-            console.error("Error en logout:", error);
+            if (error.response?.status === 401) {
+                throw new Error('Credenciales inválidas');
+            } else if (error.response?.status === 403) {
+                throw new Error('Usuario no verificado');
+            } else {
+                throw new Error('Error en el servidor');
+            }
         }
+    };
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        setUser(null);
+    };
+
+    const isAuthenticated = () => {
+        return !!localStorage.getItem('token');
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, loading }}>
+        <AuthContext.Provider 
+            value={{ 
+                user, 
+                login, 
+                logout, 
+                isAuthenticated,
+                loading 
+            }}
+        >
             {!loading && children}
         </AuthContext.Provider>
     );
+};
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    }
+    return context;
 };
 
 export default AuthContext;

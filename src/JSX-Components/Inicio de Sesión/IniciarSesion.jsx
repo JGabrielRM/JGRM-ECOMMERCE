@@ -21,57 +21,86 @@ export default function IniciarSesion() {
     setIsLoadingComplete(false);
 
     try {
+        // Intentar iniciar sesión
         await login({ email_usuario: email, password_usuario: password });
+
+        // Si el login es exitoso
         setIsLoadingComplete(true);
-        setStatus({ 
-            type: 'success', 
-            message: '¡Inicio de sesión exitoso!' 
+        setStatus({
+            type: 'success',
+            message: '¡Inicio de sesión exitoso!'
         });
-        
+
         setTimeout(() => {
             navigate('/');
         }, 1500);
+
     } catch (err) {
-        console.error('Error details:', err); // Para debugging
-        
-        if (err.response?.data?.error) {
-            switch (err.response.data.error) {
+        console.error('Error details:', err); // Muestra el error completo en consola
+
+        const statusCode = err.response?.status;
+        const errorData = err.response?.data;
+
+        if (errorData?.error) {
+            const { error, message } = errorData;
+
+            switch (error) {
                 case 'USER_NOT_VERIFIED':
                     setStatus({
                         type: 'warning',
-                        message: 'Por favor verifica tu correo electrónico para iniciar sesión'
+                        message: message || 'Por favor verifica tu correo electrónico antes de iniciar sesión'
                     });
                     break;
+
                 case 'INVALID_CREDENTIALS':
                     setStatus({
                         type: 'error',
-                        message: 'Correo electrónico o contraseña incorrectos'
+                        message: message || 'Correo electrónico o contraseña incorrectos'
                     });
                     break;
-                case 'USER_DISABLED':
+
+                case 'USER_NOT_FOUND':
                     setStatus({
                         type: 'error',
-                        message: 'Tu cuenta ha sido desactivada. Contacta al soporte'
+                        message: message || 'El usuario no existe en el sistema'
                     });
                     break;
+
+                case 'INTERNAL_SERVER_ERROR':
+                    setStatus({
+                        type: 'error',
+                        message: 'Error interno del servidor. Intenta nuevamente más tarde'
+                    });
+                    break;
+
                 default:
                     setStatus({
                         type: 'error',
-                        message: 'Error al iniciar sesión. Inténtalo de nuevo'
+                        message: message || 'Error desconocido. Inténtalo nuevamente'
                     });
             }
+
+        } else if (statusCode === 403) {
+            setStatus({
+                type: 'warning',
+                message: 'Acceso denegado. Tu cuenta podría no estar verificada'
+            });
         } else {
+            // Si no hay respuesta del servidor (timeout, CORS, o backend caído)
             setStatus({
                 type: 'error',
-                message: 'Error de conexión. Verifica tu internet'
+                message: 'Error de conexión. Verifica tu red o que el servidor esté en ejecución'
             });
         }
+
     } finally {
+        // Si no se completó exitosamente el inicio de sesión
         if (!isLoadingComplete) {
             setIsLoading(false);
         }
     }
 };
+
 
     return (
         <>
