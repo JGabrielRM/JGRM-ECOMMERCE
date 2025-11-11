@@ -50,7 +50,7 @@ export default function Cart() {
                         className="fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
                     >
                         {/* Header del carrito */}
-                        <div className="bg-lime-600 text-white p-6 flex items-center justify-between">
+                        <div className="bg-gray-600 text-white p-6 flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                                 <FaShoppingCart className="h-6 w-6" />
                                 <h2 className="text-2xl font-bold">Tu carrito</h2>
@@ -59,7 +59,7 @@ export default function Cart() {
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setIsOpen(false)}
-                                className="p-2 hover:bg-lime-700 rounded-full transition-colors"
+                                className="p-2 hover:bg-gray-700 rounded-full transition-colors"
                             >
                                 <FaTimes className="h-6 w-6" />
                             </motion.button>
@@ -77,7 +77,7 @@ export default function Cart() {
                                     <FaShoppingCart className="h-16 w-16 text-gray-300" />
                                     <div className="space-y-3">
                                         <p className="text-lg font-light text-gray-800">
-                                            Inicia sesión para añadir un producto.
+                                            Inicia sesión para añadir o comprar un producto.
                                         </p>
                                     </div>
                                 </motion.div>
@@ -104,7 +104,7 @@ export default function Cart() {
                                             exit={{ opacity: 0, x: 100 }}
                                             onMouseEnter={() => setHoveredItemId(item.idProduct)}
                                             onMouseLeave={() => setHoveredItemId(null)}
-                                            className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-lime-400 transition-colors"
+                                            className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-gray-400 transition-colors"
                                         >
                                             <div className="flex gap-3">
                                                 {/* Imagen */}
@@ -188,7 +188,7 @@ export default function Cart() {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={handleLoginRedirect}
-                                    className="w-full bg-lime-600 text-white font-semibold py-3 rounded-lg hover:bg-lime-700 transition-all duration-200"
+                                    className="w-full bg-gray-600 text-white font-semibold py-3 rounded-lg hover:bg-gray-700 transition-all duration-200"
                                 >
                                     Ir a iniciar sesión
                                 </motion.button>

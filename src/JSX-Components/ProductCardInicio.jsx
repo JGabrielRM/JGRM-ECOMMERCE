@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 export default function ProductCardInicio({ idProduct, productName, productPrice, productDescription, imageUrl, enOferta }) {
     return (
         <div className="border-none rounded-lg shadow-lg p-4 w-80 bg-white relative transform hover:scale-101 ease-in-out duration-300 flex flex-col justify-between">
-            <Link to={`/producto/${idProduct}`} className="w-full h-full flex flex-col justify-between">
+            <Link to={`/product/${idProduct}`} className="w-full h-full flex flex-col justify-between">
                 {enOferta && (
                     <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                         Oferta

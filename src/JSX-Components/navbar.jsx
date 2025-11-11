@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from "../assets/logo behance.png";
@@ -8,8 +8,10 @@ import { TiMessages } from "react-icons/ti";
 import { IoMdAdd } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
+import { FaCog, FaStore } from "react-icons/fa";
 import AuthContext from './Services/AuthContext';
 import { useCart } from './Services/CartContext.jsx';
+import { NavbarContext } from './NavBar/NavbarContext';
 
 const PascalCase = (str) => {
     if (!str) return '';
@@ -20,7 +22,9 @@ export function NavBar() {
     const navigate = useNavigate();
     const { user, isAuthenticated, logout, loading } = useContext(AuthContext);
     const { getTotalItems, isOpen, setIsOpen } = useCart();
+    const { isSticky } = useContext(NavbarContext);
     const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef(null);
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
@@ -32,17 +36,37 @@ export function NavBar() {
         navigate('/log-in');
     };
 
-    // Si está cargando, no mostrar nada
+    const handleNavigate = (path) => {
+        navigate(path);
+        setMenuOpen(false);
+    };
+
+    // Cerrar menú al hacer clic fuera de él
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setMenuOpen(false);
+            }
+        };
+
+        if (menuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [menuOpen]);
+
     if (loading) {
         return null;
     }
 
-    // Variable para verificar si está autenticado
     const isAuth = isAuthenticated();
 
     return (
         <>
-            {/* Overlay oscuro que cubre TODO incluyendo la navbar */}
+            {/* Overlay oscuro - cubre TODO incluyendo navbar */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -51,15 +75,14 @@ export function NavBar() {
                         exit={{ opacity: 0 }}
                         onClick={() => setIsOpen(false)}
                         className="fixed inset-0 bg-black/50 z-40"
-                        style={{ height: '100vh' }}
+                        style={{ top: 0, left: 0 }}
                     />
                 )}
             </AnimatePresence>
 
-            {/* Navbar con z-index menor al overlay cuando está abierto */}
+            {/* Navbar - sticky o no depende del contexto */}
             <motion.nav 
-                className="bg-white p-4 shadow-md sticky top-0 z-30 w-full"
-                animate={isOpen ? { zIndex: 30 } : { zIndex: 50 }}
+                className={`bg-white p-4 shadow-md ${isSticky ? 'sticky' : 'relative'} top-0 z-30 w-full`}
             >
                 <div className='container mx-auto flex justify-between items-center'>
                     {/* Menú de navegación izquierda */}
@@ -116,36 +139,62 @@ export function NavBar() {
                             </motion.button>
                         </li>
                         {isAuth ? (
-                            // Mostrar ícono de usuario y menú personalizado si está autenticado
-                            <li className='relative px-5 shadow rounded-2xl flex items-center space-x-2 transform active:scale-95 hover:scale-105 ease-in-out duration-300'>
+                            <li className='relative px-5 shadow rounded-2xl flex items-center space-x-2 transform active:scale-95 hover:scale-105 ease-in-out duration-300' ref={menuRef}>
                                 <FaUserCircle className='h-10 w-auto text-zinc-800' />
                                 <span className='text-zinc-800 font-medium'>
                                     {PascalCase(user?.nombre_usuario || 'Usuario')}
                                 </span>
-                                <button
+                                <motion.button
+                                    animate={{ rotate: menuOpen ? 180 : 0 }}
+                                    transition={{ duration: 0.3 }}
                                     onClick={toggleMenu}
                                     className="flex items-center text-zinc-800 focus:outline-none"
                                 >
                                     <IoIosArrowDown className="h-5 w-5 ml-2" />
-                                </button>
-                                {menuOpen && (
-                                    <motion.ul 
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute right-0 mt-20 w-40 bg-white border border-gray-300 rounded-md shadow-lg z-50"
-                                    >
-                                        <li
-                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500 font-medium transition-colors duration-200"
-                                            onClick={handleLogout}
+                                </motion.button>
+                                
+                                <AnimatePresence>
+                                    {menuOpen && (
+                                        <motion.ul 
+                                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="absolute right-0 mt-48 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-50"
                                         >
-                                            Cerrar sesión
-                                        </li>
-                                    </motion.ul>
-                                )}
+                                            {/* Configurar perfil */}
+                                            <motion.li
+                                                whileHover={{ backgroundColor: '#f3f4f6' }}
+                                                className="px-4 py-3 cursor-pointer text-gray-700 font-medium transition-colors duration-200 flex items-center space-x-2 border-b border-gray-200"
+                                                onClick={() => handleNavigate('/profile')}
+                                            >
+                                                <FaCog className="h-4 w-4" />
+                                                <span>Configurar perfil</span>
+                                            </motion.li>
+
+                                            {/* Vender */}
+                                            <motion.li
+                                                whileHover={{ backgroundColor: '#f3f4f6' }}
+                                                className="px-4 py-3 cursor-pointer text-gray-700 font-medium transition-colors duration-200 flex items-center space-x-2 border-b border-gray-200"
+                                                onClick={() => handleNavigate('/addEmployee')}
+                                            >
+                                                <FaStore className="h-4 w-4" />
+                                                <span>Vender</span>
+                                            </motion.li>
+
+                                            {/* Cerrar sesión */}
+                                            <motion.li
+                                                whileHover={{ backgroundColor: '#fef2f2' }}
+                                                className="px-4 py-3 cursor-pointer text-red-500 font-medium transition-colors duration-200"
+                                                onClick={handleLogout}
+                                            >
+                                                Cerrar sesión
+                                            </motion.li>
+                                        </motion.ul>
+                                    )}
+                                </AnimatePresence>
                             </li>
                         ) : (
-                            // Mostrar botón de iniciar sesión si no está autenticado
                             <li className='px-5 shadow rounded-2xl flex items-center space-x-2 transform active:scale-95 hover:scale-105 ease-in-out duration-300'>
                                 <Link to="/log-in" className='text-zinc-800 flex items-center space-x-2'>
                                     <CiLogin className='h-10 w-auto' />

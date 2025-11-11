@@ -4,6 +4,7 @@ import ProductServices from '../Services/ProductServices';
 import ProductCard from '../ProductCard';
 import { useCart } from '../Services/CartContext.jsx';
 import AuthContext from '../Services/AuthContext.jsx';
+import { NavbarContext } from '../NavBar/NavbarContext';
 import ProductReviews from './ProductReviews';
 
 const BASE_IMAGE_URL = "http://localhost:8080/uploads/";
@@ -13,6 +14,7 @@ export default function ProductPage() {
     const navigate = useNavigate();
     const { addToCart, setIsOpen } = useCart();
     const { isAuthenticated } = useContext(AuthContext);
+    const { setIsSticky } = useContext(NavbarContext);
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export default function ProductPage() {
 
     const handleBuyNow = () => {
         if (!isAuthenticated()) {
-            setIsOpen(true);
+            navigate('/log-in');
             return;
         }
         addToCart(product);
@@ -76,6 +78,16 @@ export default function ProductPage() {
 
         fetchProduct();
     }, [id]);
+
+    useEffect(() => {
+        // Hacer la navbar no sticky cuando se monta ProductPage
+        setIsSticky(false);
+
+        // Volver a hacer sticky cuando se desmonta
+        return () => {
+            setIsSticky(true);
+        };
+    }, [setIsSticky]);
 
     if (loading) {
         return (
