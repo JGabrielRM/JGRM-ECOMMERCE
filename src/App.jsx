@@ -22,6 +22,8 @@ import ResetPassword from './JSX-Components/Inicio de Sesión/ResetPassword';
 import { useAuth } from './JSX-Components/Services/AuthContext';
 import Checkout from './JSX-Components/Checkout/Checkout';
 import LoadingScreen from './JSX-Components/Pantalla de Carga/LoadingScreen';
+import ConfigurarPerfil from './JSX-Components/Profile/ConfigurarPerfil.jsx';
+
 
 
 const PrivateRoute = ({ children }) => {
@@ -60,6 +62,7 @@ export default function App() {
                         <Route path="/product/:id" element={<ProductPage />} />
                         <Route path="/addEmployee" element={<PrivateRoute><CreateProduct /></PrivateRoute>} />
                         <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+                        <Route path="/profile" element={<PrivateRoute><ConfigurarPerfil /></PrivateRoute>} />
                         <Route path="*" element={<PageNotFound />} />
                     </Routes>
                     {showNavBarAndFooter && <Footer />}

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoArrowBack } from "react-icons/io5";
+import { FaGoogle } from "react-icons/fa";
+import { useGoogleLogin } from '@react-oauth/google';
 import UserService from '../Services/UserService';
 import LoadingScreen from '../Pantalla de Carga/LoadingScreen';
 import StatusMessage from '../StatusMessage/StatusMessage';
+import axios from 'axios';
+import { motion } from 'framer-motion';
 
 export default function Register() {
     const [user, setUser] = useState({
@@ -53,6 +57,60 @@ export default function Register() {
             }
         }
     };
+
+    const handleGoogleRegister = useGoogleLogin({
+        onSuccess: async (codeResponse) => {
+            setIsLoading(true);
+            setError('');
+
+            try {
+                const { access_token } = codeResponse;
+
+                // Obtener información del usuario de Google
+                const googleUserInfo = await axios.get(
+                    `https://www.googleapis.com/oauth2/v2/userinfo`,
+                    {
+                        headers: { Authorization: `Bearer ${access_token}` }
+                    }
+                );
+
+                // Enviar información a tu backend con el endpoint correcto
+                const response = await axios.post('http://localhost:8080/auth/google/success', {
+                    email_usuario: googleUserInfo.data.email,
+                    nombre_usuario: googleUserInfo.data.name,
+                    googleId: googleUserInfo.data.id
+                });
+
+                if (response.data.token) {
+                    localStorage.setItem('token', response.data.token);
+                    setIsLoadingComplete(true);
+                    
+                    setTimeout(() => {
+                        navigate('/');
+                        window.location.reload();
+                    }, 1500);
+                } else if (response.data.requiresVerification) {
+                    // Si requiere verificación
+                    setIsLoadingComplete(true);
+                    setTimeout(() => {
+                        navigate('/verify-code', { 
+                            state: { 
+                                email: googleUserInfo.data.email 
+                            } 
+                        });
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Error al registrarse con Google:', error);
+                setIsLoading(false);
+                setError(error.response?.data?.message || 'Error al registrarse con Google');
+            }
+        },
+        onError: () => {
+            setError('Error al registrarse con Google');
+        },
+        flow: 'implicit'
+    });
 
     return (
         <>
@@ -153,13 +211,37 @@ export default function Register() {
                                     Crear cuenta
                                 </button>
                             </div>
-                            {error && (
-                        <StatusMessage 
-                            type="error"
-                            message={error}
-                        />
-                    )}
                         </form>
+
+                        {/* Divisor */}
+                        <div className="relative mt-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white text-gray-500">O regístrate con</span>
+                            </div>
+                        </div>
+
+                        {/* Botón Google */}
+                        <motion.button
+                            type="button"
+                            onClick={() => handleGoogleRegister()}
+                            whileHover={{ scale: 1.02, backgroundColor: '#f8f9fa' }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full mt-4 flex justify-center items-center space-x-3 rounded-full bg-white border-2 border-gray-300 px-6 py-3 text-base font-semibold text-gray-900 shadow-md hover:shadow-lg hover:border-gray-400 transition-all duration-200"
+                        >
+                            <FaGoogle className="h-6 w-6 text-blue-500" />
+                            <span>Continuar con Google</span>
+                        </motion.button>
+
+                        {/* Mensajes de error */}
+                        {error && (
+                            <StatusMessage 
+                                type="error"
+                                message={error}
+                            />
+                        )}
 
                         <p className="mt-10 text-center text-sm text-gray-500">
                             ¿Ya tienes una cuenta?{' '}
@@ -168,9 +250,6 @@ export default function Register() {
                             </Link>
                         </p>
                     </div>
-
-                    {/* Mensaje de error */}
-                
                 </div>
             </div>
         </>

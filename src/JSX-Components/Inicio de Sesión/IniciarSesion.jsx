@@ -1,9 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoArrowBack } from "react-icons/io5";
+import { FaGoogle } from "react-icons/fa";
+import { useGoogleLogin } from '@react-oauth/google';
+import { motion } from 'framer-motion';
 import AuthContext from '../Services/AuthContext';
 import StatusMessage from '../StatusMessage/StatusMessage';
 import LoadingScreen from '../Pantalla de Carga/LoadingScreen';
+import axiosInstance from '../Services/AxiosConfig';
+import axios from 'axios';
 
 export default function IniciarSesion() {
     const [email, setEmail] = useState('');
@@ -15,104 +20,155 @@ export default function IniciarSesion() {
     const { login } = useContext(AuthContext);
 
     const handleLogin = async (e) => {
-    e.preventDefault();
-    setStatus({ type: '', message: '' });
-    setIsLoading(true);
-    setIsLoadingComplete(false);
+        e.preventDefault();
+        setStatus({ type: '', message: '' });
+        setIsLoading(true);
+        setIsLoadingComplete(false);
 
-    try {
-        await login({ email_usuario: email, password_usuario: password });
-        setIsLoadingComplete(true);
-        setStatus({
-            type: 'success',
-            message: '¡Inicio de sesión exitoso!'
-        });
+        try {
+            await login({ email_usuario: email, password_usuario: password });
+            setIsLoadingComplete(true);
+            setStatus({
+                type: 'success',
+                message: '¡Inicio de sesión exitoso!'
+            });
 
-        setTimeout(() => {
-            navigate('/');
-        }, 1500);
+            setTimeout(() => {
+                navigate('/');
+            }, 1500);
 
-    } catch (err) {
-        console.error('Error completo:', err);
-        console.error('Error message:', err.message);
-        console.error('Error response:', err.response);
+        } catch (err) {
+            console.error('Error completo:', err);
+            setIsLoading(false);
 
-        // Detener la pantalla de carga
-        setIsLoading(false);
+            if (err.message) {
+                if (err.message.includes('Credenciales inválidas')) {
+                    setStatus({
+                        type: 'error',
+                        message: 'Correo electrónico o contraseña incorrectos'
+                    });
+                } else if (err.message.includes('Usuario no verificado') || err.message.includes('verifica tu correo')) {
+                    setStatus({
+                        type: 'warning',
+                        message: 'Por favor verifica tu correo electrónico antes de iniciar sesión'
+                    });
+                } else if (err.message.includes('no encontrado')) {
+                    setStatus({
+                        type: 'error',
+                        message: 'El usuario no existe en el sistema'
+                    });
+                } else {
+                    setStatus({
+                        type: 'error',
+                        message: err.message
+                    });
+                }
+            } else if (err.response?.data?.error) {
+                const { error, message } = err.response.data;
 
-        // Manejo de errores mejorado
-        if (err.message) {
-            // Si el error tiene un mensaje directo (del catch en AuthContext)
-            if (err.message.includes('Credenciales inválidas')) {
+                switch (error) {
+                    case 'USER_NOT_VERIFIED':
+                        setStatus({
+                            type: 'warning',
+                            message: message || 'Por favor verifica tu correo electrónico antes de iniciar sesión'
+                        });
+                        break;
+                    case 'INVALID_CREDENTIALS':
+                        setStatus({
+                            type: 'error',
+                            message: message || 'Correo electrónico o contraseña incorrectos'
+                        });
+                        break;
+                    case 'USER_NOT_FOUND':
+                        setStatus({
+                            type: 'error',
+                            message: message || 'El usuario no existe en el sistema'
+                        });
+                        break;
+                    default:
+                        setStatus({
+                            type: 'error',
+                            message: message || 'Error desconocido. Inténtalo nuevamente'
+                        });
+                }
+            } else if (err.response?.status === 401) {
                 setStatus({
                     type: 'error',
-                    message: 'Correo electrónico o contraseña incorrectos'
+                    message: 'Credenciales inválidas'
                 });
-            } else if (err.message.includes('Usuario no verificado') || err.message.includes('verifica tu correo')) {
+            } else if (err.response?.status === 403) {
                 setStatus({
                     type: 'warning',
-                    message: 'Por favor verifica tu correo electrónico antes de iniciar sesión'
-                });
-            } else if (err.message.includes('no encontrado')) {
-                setStatus({
-                    type: 'error',
-                    message: 'El usuario no existe en el sistema'
+                    message: 'Acceso denegado. Tu cuenta podría no estar verificada'
                 });
             } else {
                 setStatus({
                     type: 'error',
-                    message: err.message
+                    message: 'Error de conexión. Verifica tu red o que el servidor esté en ejecución'
                 });
             }
-        } else if (err.response?.data?.error) {
-            // Si tiene la estructura de error del backend
-            const { error, message } = err.response.data;
-
-            switch (error) {
-                case 'USER_NOT_VERIFIED':
-                    setStatus({
-                        type: 'warning',
-                        message: message || 'Por favor verifica tu correo electrónico antes de iniciar sesión'
-                    });
-                    break;
-                case 'INVALID_CREDENTIALS':
-                    setStatus({
-                        type: 'error',
-                        message: message || 'Correo electrónico o contraseña incorrectos'
-                    });
-                    break;
-                case 'USER_NOT_FOUND':
-                    setStatus({
-                        type: 'error',
-                        message: message || 'El usuario no existe en el sistema'
-                    });
-                    break;
-                default:
-                    setStatus({
-                        type: 'error',
-                        message: message || 'Error desconocido. Inténtalo nuevamente'
-                    });
-            }
-        } else if (err.response?.status === 401) {
-            setStatus({
-                type: 'error',
-                message: 'Credenciales inválidas'
-            });
-        } else if (err.response?.status === 403) {
-            setStatus({
-                type: 'warning',
-                message: 'Acceso denegado. Tu cuenta podría no estar verificada'
-            });
-        } else {
-            // Error de conexión
-            setStatus({
-                type: 'error',
-                message: 'Error de conexión. Verifica tu red o que el servidor esté en ejecución'
-            });
         }
-    }
-};
+    };
 
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (codeResponse) => {
+            setIsLoading(true);
+            setStatus({ type: '', message: '' });
+
+            try {
+                const { access_token } = codeResponse;
+
+                // Obtener información del usuario de Google
+                const googleUserInfo = await axios.get(
+                    `https://www.googleapis.com/oauth2/v2/userinfo`,
+                    {
+                        headers: { Authorization: `Bearer ${access_token}` }
+                    }
+                );
+
+                console.log('Google User Info:', googleUserInfo.data);
+
+                // Enviar información a tu backend con axiosInstance
+                const response = await axiosInstance.post('/auth/google/success', {
+                    email_usuario: googleUserInfo.data.email,
+                    nombre_usuario: googleUserInfo.data.name,
+                    googleId: googleUserInfo.data.id
+                });
+
+                console.log('Backend Response:', response.data);
+
+                if (response.data.token) {
+                    localStorage.setItem('token', response.data.token);
+                    setIsLoadingComplete(true);
+                    setStatus({
+                        type: 'success',
+                        message: '¡Inicio de sesión exitoso con Google!'
+                    });
+
+                    setTimeout(() => {
+                        navigate('/');
+                        window.location.reload();
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Error al iniciar sesión con Google:', error);
+                console.error('Error response:', error.response?.data);
+                setIsLoading(false);
+                setStatus({
+                    type: 'error',
+                    message: error.response?.data?.message || 'Error al iniciar sesión con Google'
+                });
+            }
+        },
+        onError: (error) => {
+            console.error('Google OAuth Error:', error);
+            setStatus({
+                type: 'error',
+                message: 'Error al iniciar sesión con Google'
+            });
+        },
+        flow: 'implicit'
+    });
 
     return (
         <>
@@ -209,6 +265,28 @@ export default function IniciarSesion() {
                                 </button>
                             </div>
                         </form>
+
+                        {/* Divisor */}
+                        <div className="relative mt-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white text-gray-500">O continúa con</span>
+                            </div>
+                        </div>
+
+                        {/* Botón Google */}
+                        <motion.button
+                            type="button"
+                            onClick={() => handleGoogleLogin()}
+                            whileHover={{ scale: 1.02, backgroundColor: '#f8f9fa' }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full mt-4 flex justify-center items-center space-x-3 rounded-full bg-white border-2 border-gray-300 px-6 py-3 text-base font-semibold text-gray-900 shadow-md hover:shadow-lg hover:border-gray-400 transition-all duration-200"
+                        >
+                            <FaGoogle className="h-6 w-6 text-blue-500" />
+                            <span>Continuar con Google</span>
+                        </motion.button>
 
                         {/* Mover el StatusMessage fuera del formulario */}
                         {status.type && status.message && (

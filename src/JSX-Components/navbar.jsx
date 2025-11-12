@@ -8,7 +8,7 @@ import { TiMessages } from "react-icons/ti";
 import { IoMdAdd } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
-import { FaCog, FaStore } from "react-icons/fa";
+import { FaCog, FaStore, FaHistory } from "react-icons/fa";
 import AuthContext from './Services/AuthContext';
 import { useCart } from './Services/CartContext.jsx';
 import { NavbarContext } from './NavBar/NavbarContext';
@@ -160,7 +160,7 @@ export function NavBar() {
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                             transition={{ duration: 0.2 }}
-                                            className="absolute right-0 mt-48 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-50"
+                                            className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-50"
                                         >
                                             {/* Configurar perfil */}
                                             <motion.li
@@ -170,6 +170,16 @@ export function NavBar() {
                                             >
                                                 <FaCog className="h-4 w-4" />
                                                 <span>Configurar perfil</span>
+                                            </motion.li>
+
+                                            {/* Historial de compras */}
+                                            <motion.li
+                                                whileHover={{ backgroundColor: '#f3f4f6' }}
+                                                className="px-4 py-3 cursor-pointer text-gray-700 font-medium transition-colors duration-200 flex items-center space-x-2 border-b border-gray-200"
+                                                onClick={() => handleNavigate('/purchase-history')}
+                                            >
+                                                <FaHistory className="h-4 w-4" />
+                                                <span>Historial de compras</span>
                                             </motion.li>
 
                                             {/* Vender */}
