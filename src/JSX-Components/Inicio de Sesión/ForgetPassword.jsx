@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IoArrowBack } from "react-icons/io5";
+import { FaGoogle, FaExclamationTriangle } from "react-icons/fa";
 import UserService from '../Services/UserService';
 import LoadingScreen from '../Pantalla de Carga/LoadingScreen';
 import StatusMessage from '../StatusMessage/StatusMessage';
@@ -10,11 +11,14 @@ export default function ForgetPassword() {
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingComplete, setIsLoadingComplete] = useState(false);
+    const [isOAuthAccount, setIsOAuthAccount] = useState(false);
 
     const handleEmailSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setIsLoadingComplete(false);
         setStatus({ type: '', message: '' });
+        setIsOAuthAccount(false);
 
         try {
             await UserService.requestPasswordReset(email);
@@ -23,15 +27,38 @@ export default function ForgetPassword() {
                 type: 'success',
                 message: 'Se ha enviado un enlace a tu correo electrónico para restablecer tu contraseña'
             });
-        } catch (error) {
-            setStatus({
-                type: 'error',
-                message: error?.response?.data?.message || 'Error al enviar el enlace de restablecimiento'
-            });
-        } finally {
+            // Ocultar LoadingScreen después de mostrar el checkmark
             setTimeout(() => {
                 setIsLoading(false);
             }, 1500);
+        } catch (error) {
+            // Ocultar LoadingScreen inmediatamente en caso de error
+            setIsLoading(false);
+            
+            const errorMessage = error?.response?.data?.error || error?.response?.data?.message || '';
+            
+            // Verificar si es una cuenta OAuth2
+            if (errorMessage.toLowerCase().includes('google') || 
+                errorMessage.toLowerCase().includes('oauth') ||
+                errorMessage.toLowerCase().includes('creada con')) {
+                setIsOAuthAccount(true);
+                setStatus({
+                    type: 'warning',
+                    message: errorMessage
+                });
+            } else if (error?.response?.status === 404) {
+                // Usuario no encontrado
+                setStatus({
+                    type: 'error',
+                    message: 'No existe una cuenta registrada con este correo electrónico'
+                });
+            } else {
+                // Otros errores
+                setStatus({
+                    type: 'error',
+                    message: errorMessage || 'Error al enviar el enlace de restablecimiento. Inténtalo nuevamente'
+                });
+            }
         }
     };
 
@@ -72,7 +99,6 @@ export default function ForgetPassword() {
                         </p>
                     </div>
 
-
                     {/* Formulario */}
                     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                         <form onSubmit={handleEmailSubmit} className="space-y-6">
@@ -101,12 +127,41 @@ export default function ForgetPassword() {
                                 Enviar enlace de restablecimiento
                             </button>
 
-                                    {/* Mensajes de estado */}
+                            {/* Mensajes de estado */}
                             {status.type && status.message && (
-                                <StatusMessage 
-                                    type={status.type} 
-                                    message={status.message}
-                                />
+                                <div className="space-y-3">
+                                    <StatusMessage 
+                                        type={status.type} 
+                                        message={status.message}
+                                    />
+                                    {isOAuthAccount && (
+                                        <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200 shadow-md">
+                                            <div className="flex items-start space-x-3 mb-4">
+                                                <div className="flex-shrink-0 mt-0.5">
+                                                    <FaExclamationTriangle className="text-amber-500 text-xl" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="text-sm font-bold text-gray-800 mb-1">
+                                                        Cuenta registrada con Google
+                                                    </h3>
+                                                    <p className="text-sm text-gray-700 leading-relaxed">
+                                                        Esta cuenta fue creada usando Google y no tiene una contraseña asociada. 
+                                                        Para iniciar sesión, debes usar el botón "Continuar con Google".
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-center space-x-2 pt-3 border-t border-blue-200">
+                                                <FaGoogle className="text-blue-600 text-lg" />
+                                                <Link 
+                                                    to="/log-in" 
+                                                    className="inline-flex items-center text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-5 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                                                >
+                                                    Ir a iniciar sesión con Google
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </form>
                     </div>

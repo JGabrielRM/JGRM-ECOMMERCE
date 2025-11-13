@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import UserService from '../Services/UserService';
 import { IoArrowBack } from "react-icons/io5";
@@ -8,7 +8,10 @@ import StatusMessage from '../StatusMessage/StatusMessage';
 
 export default function ResetPassword() {
     const [searchParams] = useSearchParams();
-    const token = searchParams.get('token');
+    const { token: tokenParam } = useParams();
+    const tokenQuery = searchParams.get('token');
+    // Aceptar token como parámetro de ruta o como query parameter
+    const token = tokenParam || tokenQuery;
     const navigate = useNavigate();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,6 +36,9 @@ export default function ResetPassword() {
         }
 
         setIsLoading(true);
+        setIsLoadingComplete(false);
+        setStatus({ type: '', message: '' });
+
         try {
             await UserService.resetPassword(token, password);
             setIsLoadingComplete(true);
@@ -40,18 +46,20 @@ export default function ResetPassword() {
                 type: 'success',
                 message: '¡Contraseña actualizada exitosamente!'
             });
+            // Ocultar LoadingScreen después de mostrar el checkmark
             setTimeout(() => {
-                navigate('/log-in');
-            }, 2000);
+                setIsLoading(false);
+                setTimeout(() => {
+                    navigate('/log-in');
+                }, 500);
+            }, 1500);
         } catch (error) {
+            // Ocultar LoadingScreen inmediatamente en caso de error
+            setIsLoading(false);
             setStatus({
                 type: 'error',
                 message: error?.response?.data?.message || 'Error al restablecer la contraseña'
             });
-        } finally {
-            if (!isLoadingComplete) {
-                setIsLoading(false);
-            }
         }
     };
 

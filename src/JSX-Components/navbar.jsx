@@ -176,7 +176,7 @@ export function NavBar() {
                                             <motion.li
                                                 whileHover={{ backgroundColor: '#f3f4f6' }}
                                                 className="px-4 py-3 cursor-pointer text-gray-700 font-medium transition-colors duration-200 flex items-center space-x-2 border-b border-gray-200"
-                                                onClick={() => handleNavigate('/purchase-history')}
+                                                onClick={() => handleNavigate('/historial-compras')}
                                             >
                                                 <FaHistory className="h-4 w-4" />
                                                 <span>Historial de compras</span>

@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../Services/AuthContext';
 import { NavbarContext } from '../NavBar/NavbarContext';
-import { FaCog, FaPhone, FaIdCard, FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
+import SidebarProfile from './SidebarProfile';
 import axiosInstance from '../Services/AxiosConfig';
 
 export default function ConfigurarPerfil() {
     const navigate = useNavigate();
-    const { user, isAuthenticated, logout } = useContext(AuthContext);
+    const { user, isAuthenticated } = useContext(AuthContext);
     const { setIsSticky } = useContext(NavbarContext);
     const [activeTab, setActiveTab] = useState('username');
     const [loading, setLoading] = useState(false);
@@ -142,16 +143,6 @@ export default function ConfigurarPerfil() {
         }
     };
 
-    const menuItems = [
-        { id: 'username', label: 'Cambiar usuario', icon: FaCog },
-        { id: 'phone', label: 'Agregar teléfono', icon: FaPhone },
-        { id: 'identification', label: 'Agregar identificación', icon: FaIdCard }
-    ];
-
-    const sidebarVariants = {
-        hidden: { x: -300, opacity: 0 },
-        visible: { x: 0, opacity: 1, transition: { duration: 0.3 } }
-    };
 
     const contentVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -166,81 +157,29 @@ export default function ConfigurarPerfil() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
-            {/* Menú Lateral - Pegado a la izquierda ocupando toda la altura */}
-            <motion.div
-                variants={sidebarVariants}
-                initial="hidden"
-                animate="visible"
-                className="w-64 bg-white shadow-lg min-h-screen"
-            >
-                <div className="p-6 top-0">
-                    <h2 className="text-xl font-bold text-gray-800 mb-6">Mi Perfil</h2>
-                    <nav className="space-y-2">
-                        {menuItems.map((item) => {
-                            const Icon = item.icon;
-                            return (
-                                <motion.button
-                                    key={item.id}
-                                    whileHover={{ x: 5 }}
-                                    onClick={() => setActiveTab(item.id)}
-                                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                                        activeTab === item.id
-                                            ? 'bg-gray-600 text-white shadow-md'
-                                            : 'text-gray-700 hover:bg-gray-100'
-                                    }`}
-                                >
-                                    <Icon className="h-5 w-5" />
-                                    <span className="font-medium">{item.label}</span>
-                                </motion.button>
-                            );
-                        })}
-                    </nav>
-
-                    {/* Información del usuario */}
-                    <div className="mt-8 pt-6 border-t border-gray-200">
-                        <p className="text-sm text-gray-600 mb-2">Usuario actual:</p>
-                        <p className="font-semibold text-gray-800 truncate">{user?.nombre_usuario}</p>
-                        <p className="text-xs text-gray-500 mt-2">{user?.email_usuario}</p>
-                    </div>
-
-                    {/* Botón de cerrar sesión */}
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                            logout();
-                            navigate('/log-in');
-                        }}
-                        className="w-full mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors font-semibold"
-                    >
-                        Cerrar sesión
-                    </motion.button>
-                </div>
-            </motion.div>
+            {/* Sidebar Personalizado */}
+            <SidebarProfile activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {/* Contenido Principal - Ocupando todo el espacio derecho */}
             <div className="flex-1 bg-gray-50 flex flex-col">
-                {/* Botón de regreso */}
-                <div className="max-w-4xl mx-auto w-full px-4 pt-10">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate('/')}
-                        className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 mb-6"
-                    >
-                        <FaArrowLeft className="h-5 w-5" />
-                        <span>Volver</span>
-                    </motion.button>
-                </div>
-
                 {/* Contenido centrado */}
-                <div className="flex-1 flex items-start justify-center px-4 pb-10">
+                <div className="flex-1 flex items-start justify-center px-4 pt-10 pb-10">
                     <motion.div
                         variants={contentVariants}
                         initial="hidden"
                         animate="visible"
                         className="w-full max-w-2xl"
                     >
+                        {/* Botón de regreso */}
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate('/')}
+                            className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 mb-6"
+                        >
+                            <FaArrowLeft className="h-5 w-5" />
+                            <span>Inicio</span>
+                        </motion.button>
                         {/* Mensajes */}
                         <AnimatePresence>
                             {successMessage && (

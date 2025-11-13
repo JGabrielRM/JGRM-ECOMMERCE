@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { IoArrowBack } from "react-icons/io5";
 import { FaGoogle } from "react-icons/fa";
 import { useGoogleLogin } from '@react-oauth/google';
@@ -18,6 +18,19 @@ export default function IniciarSesion() {
     const [isLoadingComplete, setIsLoadingComplete] = useState(false);
     const navigate = useNavigate();
     const { login } = useContext(AuthContext);
+    const [searchParams] = useSearchParams();
+
+    // Mostrar mensaje si viene de registro con Google
+    useEffect(() => {
+        if (searchParams.get('registered') === 'true') {
+            const emailParam = searchParams.get('email');
+            setStatus({
+                type: 'success',
+                message: `¡Cuenta creada exitosamente con ${emailParam}! Ahora puedes iniciar sesión.`
+            });
+            setEmail(emailParam || '');
+        }
+    }, [searchParams]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -110,65 +123,10 @@ export default function IniciarSesion() {
         }
     };
 
-    const handleGoogleLogin = useGoogleLogin({
-        onSuccess: async (codeResponse) => {
-            setIsLoading(true);
-            setStatus({ type: '', message: '' });
+                const handleGoogleLogin = () => {
+            window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        };
 
-            try {
-                const { access_token } = codeResponse;
-
-                // Obtener información del usuario de Google
-                const googleUserInfo = await axios.get(
-                    `https://www.googleapis.com/oauth2/v2/userinfo`,
-                    {
-                        headers: { Authorization: `Bearer ${access_token}` }
-                    }
-                );
-
-                console.log('Google User Info:', googleUserInfo.data);
-
-                // Enviar información a tu backend con axiosInstance
-                const response = await axiosInstance.post('/auth/google/success', {
-                    email_usuario: googleUserInfo.data.email,
-                    nombre_usuario: googleUserInfo.data.name,
-                    googleId: googleUserInfo.data.id
-                });
-
-                console.log('Backend Response:', response.data);
-
-                if (response.data.token) {
-                    localStorage.setItem('token', response.data.token);
-                    setIsLoadingComplete(true);
-                    setStatus({
-                        type: 'success',
-                        message: '¡Inicio de sesión exitoso con Google!'
-                    });
-
-                    setTimeout(() => {
-                        navigate('/');
-                        window.location.reload();
-                    }, 1500);
-                }
-            } catch (error) {
-                console.error('Error al iniciar sesión con Google:', error);
-                console.error('Error response:', error.response?.data);
-                setIsLoading(false);
-                setStatus({
-                    type: 'error',
-                    message: error.response?.data?.message || 'Error al iniciar sesión con Google'
-                });
-            }
-        },
-        onError: (error) => {
-            console.error('Google OAuth Error:', error);
-            setStatus({
-                type: 'error',
-                message: 'Error al iniciar sesión con Google'
-            });
-        },
-        flow: 'implicit'
-    });
 
     return (
         <>
@@ -279,7 +237,7 @@ export default function IniciarSesion() {
                         {/* Botón Google */}
                         <motion.button
                             type="button"
-                            onClick={() => handleGoogleLogin()}
+                            onClick={handleGoogleLogin}  // Ya no necesitas los paréntesis ()
                             whileHover={{ scale: 1.02, backgroundColor: '#f8f9fa' }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full mt-4 flex justify-center items-center space-x-3 rounded-full bg-white border-2 border-gray-300 px-6 py-3 text-base font-semibold text-gray-900 shadow-md hover:shadow-lg hover:border-gray-400 transition-all duration-200"

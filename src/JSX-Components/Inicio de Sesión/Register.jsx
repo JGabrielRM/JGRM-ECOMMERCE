@@ -58,59 +58,6 @@ export default function Register() {
         }
     };
 
-    const handleGoogleRegister = useGoogleLogin({
-        onSuccess: async (codeResponse) => {
-            setIsLoading(true);
-            setError('');
-
-            try {
-                const { access_token } = codeResponse;
-
-                // Obtener información del usuario de Google
-                const googleUserInfo = await axios.get(
-                    `https://www.googleapis.com/oauth2/v2/userinfo`,
-                    {
-                        headers: { Authorization: `Bearer ${access_token}` }
-                    }
-                );
-
-                // Enviar información a tu backend con el endpoint correcto
-                const response = await axios.post('http://localhost:8080/auth/google/success', {
-                    email_usuario: googleUserInfo.data.email,
-                    nombre_usuario: googleUserInfo.data.name,
-                    googleId: googleUserInfo.data.id
-                });
-
-                if (response.data.token) {
-                    localStorage.setItem('token', response.data.token);
-                    setIsLoadingComplete(true);
-                    
-                    setTimeout(() => {
-                        navigate('/');
-                        window.location.reload();
-                    }, 1500);
-                } else if (response.data.requiresVerification) {
-                    // Si requiere verificación
-                    setIsLoadingComplete(true);
-                    setTimeout(() => {
-                        navigate('/verify-code', { 
-                            state: { 
-                                email: googleUserInfo.data.email 
-                            } 
-                        });
-                    }, 1500);
-                }
-            } catch (error) {
-                console.error('Error al registrarse con Google:', error);
-                setIsLoading(false);
-                setError(error.response?.data?.message || 'Error al registrarse con Google');
-            }
-        },
-        onError: () => {
-            setError('Error al registrarse con Google');
-        },
-        flow: 'implicit'
-    });
 
     return (
         <>
@@ -223,14 +170,15 @@ export default function Register() {
                             </div>
                         </div>
 
-                        {/* Botón Google */}
                         <motion.button
                             type="button"
-                            onClick={() => handleGoogleRegister()}
+                            onClick={() => {
+                                window.location.href = "http://localhost:8080/oauth2/authorization/google";
+                            }}
                             whileHover={{ scale: 1.02, backgroundColor: '#f8f9fa' }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full mt-4 flex justify-center items-center space-x-3 rounded-full bg-white border-2 border-gray-300 px-6 py-3 text-base font-semibold text-gray-900 shadow-md hover:shadow-lg hover:border-gray-400 transition-all duration-200"
-                        >
+                            >
                             <FaGoogle className="h-6 w-6 text-blue-500" />
                             <span>Continuar con Google</span>
                         </motion.button>

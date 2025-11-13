@@ -23,6 +23,8 @@ import { useAuth } from './JSX-Components/Services/AuthContext';
 import Checkout from './JSX-Components/Checkout/Checkout';
 import LoadingScreen from './JSX-Components/Pantalla de Carga/LoadingScreen';
 import ConfigurarPerfil from './JSX-Components/Profile/ConfigurarPerfil.jsx';
+import IniciarSesionExitoso from './JSX-Components/Inicio de Sesión/IniciarSesionExitoso.jsx';
+import HistorialCompras from './JSX-Components/Profile/HistorialCompras.jsx';
 
 
 
@@ -39,7 +41,7 @@ const PrivateRoute = ({ children }) => {
 export default function App() {
     const location = useLocation();
 
-    const showNavBarAndFooter = !['log-in', 'register', 'verify-code', 'forget-password', 'reset-password', 'registro-exitoso'].includes(
+    const showNavBarAndFooter = !['log-in', 'register', 'verify-code', 'forgot-password', 'reset-password', 'registro-exitoso', 'success'].includes(
         location.pathname.split('/').pop()
     );
 
@@ -53,16 +55,19 @@ export default function App() {
                         <Route path="/" element={<Inicio />} />
                         <Route path="/contacto" element={<Contacto />} />
                         <Route path="/log-in" element={<IniciarSesion />} />
+                        <Route path="/login/success" element={<IniciarSesionExitoso />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/verify-code" element={<VerifyCode />} />
-                        <Route path="/forget-password" element={<ForgetPassword />} />
+                        <Route path="/forgot-password" element={<ForgetPassword />} />
                         <Route path="/reset-password/:token" element={<ResetPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/registro-exitoso" element={<RegistroExitoso />} />
                         <Route path="/search" element={<Search />} />
                         <Route path="/product/:id" element={<ProductPage />} />
                         <Route path="/addEmployee" element={<PrivateRoute><CreateProduct /></PrivateRoute>} />
                         <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
                         <Route path="/profile" element={<PrivateRoute><ConfigurarPerfil /></PrivateRoute>} />
+                        <Route path="/historial-compras" element={<PrivateRoute><HistorialCompras /></PrivateRoute>} />
                         <Route path="*" element={<PageNotFound />} />
                     </Routes>
                     {showNavBarAndFooter && <Footer />}

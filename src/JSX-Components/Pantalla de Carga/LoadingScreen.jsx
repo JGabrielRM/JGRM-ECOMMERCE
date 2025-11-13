@@ -60,10 +60,10 @@ export default function LoadingScreen({
                 variants={fadeVariants}
                 className={`${isFullScreen ? 'fixed inset-0 z-50' : 'relative'}`}
             >
-                {/* Overlay with fade */}
+                {/* Overlay with fade and blur */}
                 <motion.div 
                     variants={fadeVariants}
-                    className="absolute inset-0 backdrop-blur-sm"
+                    className="absolute inset-0 bg-white/30 backdrop-blur-md"
                 />
                 
                 {/* Container with fade and scale */}
