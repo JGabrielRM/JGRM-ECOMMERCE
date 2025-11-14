@@ -7,6 +7,7 @@ import { FaArrowLeft, FaShoppingBag, FaCalendarAlt, FaCheckCircle, FaClock, FaTi
 import SidebarProfile from './SidebarProfile';
 import axiosInstance from '../Services/AxiosConfig';
 import LoadingScreen from '../Pantalla de Carga/LoadingScreen';
+import Footer from '../Footer/Footer.jsx';
 
 export default function HistorialCompras() {
     const navigate = useNavigate();
@@ -175,12 +176,13 @@ export default function HistorialCompras() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
-            {/* Sidebar Personalizado */}
-            <SidebarProfile />
+        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
+            <div className="bg-gray-50 flex flex-grow">
+                {/* Sidebar Personalizado */}
+                <SidebarProfile />
 
-            {/* Contenido Principal */}
-            <div className="flex-1 bg-gray-50 flex flex-col">
+                {/* Contenido Principal */}
+                <div className="flex-1 bg-gray-50 flex flex-col">
                 <div className="flex-1 flex items-start justify-center px-4 pt-10 pb-10">
                     <motion.div
                         variants={contentVariants}
@@ -380,6 +382,10 @@ export default function HistorialCompras() {
                         </AnimatePresence>
                     </motion.div>
                 </div>
+            </div>
+            </div>
+            <div className="mt-auto">
+                <Footer />
             </div>
         </div>
     );

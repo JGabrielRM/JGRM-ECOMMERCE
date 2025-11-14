@@ -47,7 +47,7 @@ export default function Cart() {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-                        className="fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
+                        className="fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-100 flex flex-col"
                     >
                         {/* Header del carrito */}
                         <div className="bg-gray-600 text-white p-6 flex items-center justify-between">

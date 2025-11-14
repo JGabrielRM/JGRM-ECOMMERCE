@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import CreateProductPrice from './CreateProductPrice';
 import ProductServices from '../Services/ProductServices';
 import AuthContext from '../Services/AuthContext';
+import Footer from '../Footer/Footer.jsx';
 
 export default function CreateProduct() {
 
@@ -216,7 +217,8 @@ export default function CreateProduct() {
     };
 
     return (
-            <div className="w-full max-w-2xl mx-auto py-10">
+        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
+            <div className="w-full max-w-2xl mx-auto py-10 flex-grow">
                 <h2 className="text-2xl font-bold text-center mb-6">Agregar Producto</h2>
                 
                 <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 space-y-6">
@@ -374,5 +376,9 @@ export default function CreateProduct() {
                     </div>
                 )}
             </div>
+            <div className="mt-auto">
+                <Footer />
+            </div>
+        </div>
     );
 }

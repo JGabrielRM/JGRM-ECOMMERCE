@@ -3,6 +3,7 @@ import { Carousel } from "./Carousel.jsx";
 import CatalogoOfertas from "./CatalogoOfertas.jsx";
 import ScrollDescuento from "./ScrollDescuento.jsx";
 import PromocionInicio from "./PromocionInicio.jsx";
+import Footer from '../Footer/Footer.jsx';
 
 
 export function Inicio () {
@@ -21,11 +22,16 @@ export function Inicio () {
         }
     ]
     return (
-        <div className='w-full flex flex-col items-center'>
-        <Carousel slides={slides} />
-        <PromocionInicio />
-        <ScrollDescuento />
-        <CatalogoOfertas />
+        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
+            <div className='w-full flex flex-col items-center flex-grow'>
+                <Carousel slides={slides} />
+                <PromocionInicio />
+                <ScrollDescuento />
+                <CatalogoOfertas />
+            </div>
+            <div className="mt-auto">
+                <Footer />
+            </div>
         </div>
     );
 }

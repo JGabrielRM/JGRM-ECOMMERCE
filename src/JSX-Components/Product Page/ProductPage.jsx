@@ -6,6 +6,7 @@ import { useCart } from '../Services/CartContext.jsx';
 import AuthContext from '../Services/AuthContext.jsx';
 import { NavbarContext } from '../NavBar/NavbarContext';
 import ProductReviews from './ProductReviews';
+import Footer from '../Footer/Footer.jsx';
 
 const BASE_IMAGE_URL = "http://localhost:8080/uploads/";
 
@@ -108,8 +109,9 @@ export default function ProductPage() {
     const { imageProduct: imageUrl, productName, productDescription, categoriaProduct, subCategoriaProduct, productPrice } = product;
 
     return (
-        <div className="max-w-7xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 mb-25">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
+            <div className="max-w-7xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 mb-25 flex-grow">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Imagen del producto sin zoom */}
                 <div className="space-y-4">
                     <div className="h-96 bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
@@ -173,28 +175,32 @@ export default function ProductPage() {
                 </div>
             </div>
 
-            {/* Apartado de "Te podría interesar" */}
-            <div className="mt-15">
-                <h2 className="text-2xl font-bold text-gray-800 mb-8">Te podría interesar</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {relatedProducts.map((relatedProduct) => (
-                        <ProductCard
-                            key={relatedProduct.idProduct}
-                            idProduct={relatedProduct.idProduct}
-                            productName={relatedProduct.productName}
-                            productPrice={new Intl.NumberFormat('es-CO', {
-                                style: 'currency',
-                                currency: 'COP',
-                            }).format(relatedProduct.productPrice)}
-                            productDescription={relatedProduct.productDescription}
-                            imageUrl={relatedProduct.imageProduct}
-                        />
-                    ))}
+                {/* Apartado de "Te podría interesar" */}
+                <div className="mt-15">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-8">Te podría interesar</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {relatedProducts.map((relatedProduct) => (
+                            <ProductCard
+                                key={relatedProduct.idProduct}
+                                idProduct={relatedProduct.idProduct}
+                                productName={relatedProduct.productName}
+                                productPrice={new Intl.NumberFormat('es-CO', {
+                                    style: 'currency',
+                                    currency: 'COP',
+                                }).format(relatedProduct.productPrice)}
+                                productDescription={relatedProduct.productDescription}
+                                imageUrl={relatedProduct.imageProduct}
+                            />
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* Apartado de opiniones */}
-            <ProductReviews productId={id} />
+                {/* Apartado de opiniones */}
+                <ProductReviews productId={id} />
+            </div>
+            <div className="mt-auto">
+                <Footer />
+            </div>
         </div>
     );
 }

@@ -45,6 +45,16 @@ export default function App() {
         location.pathname.split('/').pop()
     );
 
+    // Páginas que tienen su propio footer incluido
+    const pagesWithOwnFooter = ['/', '/contacto', '/search', '/product', '/addEmployee', '/checkout', '/profile', '/historial-compras'];
+
+    const hasOwnFooter = pagesWithOwnFooter.some(page => {
+        if (page === '/product') {
+            return location.pathname.startsWith('/product/');
+        }
+        return location.pathname === page;
+    });
+
     return (
         <AuthProvider>
             <NavbarProvider>
@@ -70,7 +80,7 @@ export default function App() {
                         <Route path="/historial-compras" element={<PrivateRoute><HistorialCompras /></PrivateRoute>} />
                         <Route path="*" element={<PageNotFound />} />
                     </Routes>
-                    {showNavBarAndFooter && <Footer />}
+                    {showNavBarAndFooter && !hasOwnFooter && <Footer />}
                 </CartProvider>
             </NavbarProvider>
         </AuthProvider>

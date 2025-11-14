@@ -6,6 +6,7 @@ import { NavbarContext } from '../NavBar/NavbarContext';
 import { FaArrowLeft } from 'react-icons/fa';
 import SidebarProfile from './SidebarProfile';
 import axiosInstance from '../Services/AxiosConfig';
+import Footer from '../Footer/Footer.jsx';
 
 export default function ConfigurarPerfil() {
     const navigate = useNavigate();
@@ -156,12 +157,13 @@ export default function ConfigurarPerfil() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
-            {/* Sidebar Personalizado */}
-            <SidebarProfile activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
+            <div className="bg-gray-50 flex flex-grow">
+                {/* Sidebar Personalizado */}
+                <SidebarProfile activeTab={activeTab} setActiveTab={setActiveTab} />
 
-            {/* Contenido Principal - Ocupando todo el espacio derecho */}
-            <div className="flex-1 bg-gray-50 flex flex-col">
+                {/* Contenido Principal - Ocupando todo el espacio derecho */}
+                <div className="flex-1 bg-gray-50 flex flex-col">
                 {/* Contenido centrado */}
                 <div className="flex-1 flex items-start justify-center px-4 pt-10 pb-10">
                     <motion.div
@@ -360,6 +362,10 @@ export default function ConfigurarPerfil() {
                         )}
                     </motion.div>
                 </div>
+            </div>
+            </div>
+            <div className="mt-auto">
+                <Footer />
             </div>
         </div>
     );

@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { CartContext } from '../Services/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Footer from '../Footer/Footer.jsx';
 
 export default function Checkout() {
     const { cartItems } = useContext(CartContext);
@@ -10,12 +11,13 @@ export default function Checkout() {
     const totalPrice = cartItems.reduce((total, item) => total + (item.productPrice * item.quantity), 0);
 
     return (
-        <div className="max-w-4xl mx-auto p-6 mt-10 mb-20">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-            >
+        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
+            <div className="max-w-4xl mx-auto p-6 mt-10 mb-20 flex-grow">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                >
                 <h1 className="text-3xl font-bold text-gray-800">Checkout</h1>
 
                 {/* Resumen del carrito */}
@@ -54,7 +56,11 @@ export default function Checkout() {
                         Procesar pago
                     </button>
                 </div>
-            </motion.div>
+                </motion.div>
+            </div>
+            <div className="mt-auto">
+                <Footer />
+            </div>
         </div>
     );
 }
