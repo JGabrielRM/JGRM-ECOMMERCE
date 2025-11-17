@@ -9,6 +9,16 @@ import StatusMessage from '../StatusMessage/StatusMessage';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
+const MAX_USERNAME_LENGTH = 20;
+const MAX_EMAIL_LENGTH = 50;
+const MAX_PASSWORD_LENGTH = 20;
+
+const LIMIT_MESSAGES = {
+    nombre_usuario: `Has alcanzado el máximo de ${MAX_USERNAME_LENGTH} caracteres para el nombre de usuario`,
+    email_usuario: `Has alcanzado el máximo de ${MAX_EMAIL_LENGTH} caracteres para el correo electrónico`,
+    password_usuario: `Has alcanzado el máximo de ${MAX_PASSWORD_LENGTH} caracteres para la contraseña`
+};
+
 export default function Register() {
     const [user, setUser] = useState({
         nombre_usuario: '',
@@ -21,14 +31,82 @@ export default function Register() {
     const navigate = useNavigate();
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        if (name === 'nombre_usuario') {
+            if (value.length > MAX_USERNAME_LENGTH) {
+                setError(`El nombre de usuario no puede superar ${MAX_USERNAME_LENGTH} caracteres`);
+                return;
+            }
+
+            if (error === `El nombre de usuario no puede superar ${MAX_USERNAME_LENGTH} caracteres`) {
+                setError('');
+            }
+        }
+
+        if (name === 'email_usuario') {
+            if (value.length > MAX_EMAIL_LENGTH) {
+                setError(`El correo no puede superar ${MAX_EMAIL_LENGTH} caracteres`);
+                return;
+            }
+
+            if (error === `El correo no puede superar ${MAX_EMAIL_LENGTH} caracteres`) {
+                setError('');
+            }
+        }
+
+        if (name === 'password_usuario') {
+            if (value.length > MAX_PASSWORD_LENGTH) {
+                setError(`La contraseña no puede superar ${MAX_PASSWORD_LENGTH} caracteres`);
+                return;
+            }
+
+            if (error === `La contraseña no puede superar ${MAX_PASSWORD_LENGTH} caracteres`) {
+                setError('');
+            }
+        }
+
+        const fieldLimits = {
+            nombre_usuario: MAX_USERNAME_LENGTH,
+            email_usuario: MAX_EMAIL_LENGTH,
+            password_usuario: MAX_PASSWORD_LENGTH
+        };
+
+        const currentFieldMax = fieldLimits[name];
+        const limitMessage = LIMIT_MESSAGES[name];
+
+        if (currentFieldMax && limitMessage) {
+            if (value.length === currentFieldMax && user[name].length < currentFieldMax) {
+                setError(limitMessage);
+            } else if (error === limitMessage && value.length < currentFieldMax) {
+                setError('');
+            }
+        }
+
         setUser({
             ...user,
-            [e.target.name]: e.target.value
+            [name]: value
         });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (user.nombre_usuario.length > MAX_USERNAME_LENGTH) {
+            setError(`El nombre de usuario no puede superar ${MAX_USERNAME_LENGTH} caracteres`);
+            return;
+        }
+
+        if (user.email_usuario.length > MAX_EMAIL_LENGTH) {
+            setError(`El correo no puede superar ${MAX_EMAIL_LENGTH} caracteres`);
+            return;
+        }
+
+        if (user.password_usuario.length > MAX_PASSWORD_LENGTH) {
+            setError(`La contraseña no puede superar ${MAX_PASSWORD_LENGTH} caracteres`);
+            return;
+        }
+
         setIsLoading(true);
         setIsLoadingComplete(false);
         
@@ -109,6 +187,7 @@ export default function Register() {
                                         name="nombre_usuario"
                                         type="text"
                                         required
+                                        maxLength={MAX_USERNAME_LENGTH}
                                         value={user.nombre_usuario}
                                         onChange={handleChange}
                                         className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-gray-900 sm:text-sm"
@@ -126,6 +205,7 @@ export default function Register() {
                                         name="email_usuario"
                                         type="email"
                                         required
+                                        maxLength={MAX_EMAIL_LENGTH}
                                         value={user.email_usuario}
                                         onChange={handleChange}
                                         className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-gray-900 sm:text-sm"
@@ -143,6 +223,7 @@ export default function Register() {
                                         name="password_usuario"
                                         type="password"
                                         required
+                                        maxLength={MAX_PASSWORD_LENGTH}
                                         value={user.password_usuario}
                                         onChange={handleChange}
                                         className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-gray-900 sm:text-sm"

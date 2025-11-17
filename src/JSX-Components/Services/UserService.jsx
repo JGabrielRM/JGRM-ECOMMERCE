@@ -47,6 +47,42 @@ const UserService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    setupTwoFactor: async () => {
+        try {
+            const response = await axiosInstance.post('/auth/2fa/setup');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    enableTwoFactor: async (code) => {
+        try {
+            const response = await axiosInstance.post('/auth/2fa/enable', { code });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    disableTwoFactor: async (code) => {
+        try {
+            const response = await axiosInstance.post('/auth/2fa/disable', { code });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    getTwoFactorStatus: async () => {
+        try {
+            const response = await axiosInstance.get('/auth/2fa/status');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

@@ -3,28 +3,29 @@ import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { Inicio } from "./JSX-Components/Pagina-inicio/Inicio.jsx";
 import { Contacto } from './JSX-Components/Contacto/Contacto.jsx';
 import { NavBar } from './JSX-Components/navbar.jsx';
-import IniciarSesion from './JSX-Components/Inicio de Sesión/IniciarSesion.jsx';
-import Register from './JSX-Components/Inicio de Sesión/Register.jsx';
+import IniciarSesion from './JSX-Components/InicioSesion/IniciarSesion.jsx';
+import Register from './JSX-Components/InicioSesion/Register.jsx';
 import Cart from './JSX-Components/Cart.jsx';
 import './index.css';
 import CreateProduct from './JSX-Components/Crear-Producto/CreateProduct.jsx';
 import Search from './JSX-Components/Search/Search.jsx';
-import RegistroExitoso from './JSX-Components/Inicio de Sesión/RegistroExitoso.jsx';
+import RegistroExitoso from './JSX-Components/InicioSesion/RegistroExitoso.jsx';
 import { AuthProvider } from './JSX-Components/Services/AuthContext.jsx';
 import PageNotFound from './JSX-Components/Page not Found/PageNotFound.jsx';
 import ProductPage from './JSX-Components/Product Page/ProductPage.jsx';
 import { CartProvider } from './JSX-Components/Services/CartContext.jsx';
 import { NavbarProvider } from './JSX-Components/NavBar/NavbarContext.jsx';
 import Footer from './JSX-Components/Footer/Footer.jsx';
-import VerifyCode from './JSX-Components/Inicio de Sesión/VerifyCode';
-import ForgetPassword from './JSX-Components/Inicio de Sesión/ForgetPassword';
-import ResetPassword from './JSX-Components/Inicio de Sesión/ResetPassword';
+import VerifyCode from './JSX-Components/InicioSesion/VerifyCode.jsx';
+import ForgetPassword from './JSX-Components/InicioSesion/ForgetPassword.jsx';
+import ResetPassword from './JSX-Components/InicioSesion/ResetPassword.jsx';
 import { useAuth } from './JSX-Components/Services/AuthContext';
 import Checkout from './JSX-Components/Checkout/Checkout';
 import LoadingScreen from './JSX-Components/Pantalla de Carga/LoadingScreen';
 import ConfigurarPerfil from './JSX-Components/Profile/ConfigurarPerfil.jsx';
-import IniciarSesionExitoso from './JSX-Components/Inicio de Sesión/IniciarSesionExitoso.jsx';
+import IniciarSesionExitoso from './JSX-Components/InicioSesion/IniciarSesionExitoso.jsx';
 import HistorialCompras from './JSX-Components/Profile/HistorialCompras.jsx';
+import TwoFAAuth from './JSX-Components/InicioSesion/TwoFAAuth.jsx';
 
 
 
@@ -41,7 +42,7 @@ const PrivateRoute = ({ children }) => {
 export default function App() {
     const location = useLocation();
 
-    const showNavBarAndFooter = !['log-in', 'register', 'verify-code', 'forgot-password', 'reset-password', 'registro-exitoso', 'success'].includes(
+    const showNavBarAndFooter = !['log-in', 'register', 'verify-code', 'forgot-password', 'reset-password', 'registro-exitoso', 'success', 'configurar-2fa'].includes(
         location.pathname.split('/').pop()
     );
 
@@ -66,6 +67,7 @@ export default function App() {
                         <Route path="/contacto" element={<Contacto />} />
                         <Route path="/log-in" element={<IniciarSesion />} />
                         <Route path="/login/success" element={<IniciarSesionExitoso />} />
+                        <Route path="/configurar-2fa" element={<PrivateRoute><TwoFAAuth /></PrivateRoute>} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/verify-code" element={<VerifyCode />} />
                         <Route path="/forgot-password" element={<ForgetPassword />} />
