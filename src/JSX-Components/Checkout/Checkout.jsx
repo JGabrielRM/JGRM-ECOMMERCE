@@ -12,50 +12,50 @@ export default function Checkout() {
 
     return (
         <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
-            <div className="max-w-4xl mx-auto p-6 mt-10 mb-20 flex-grow">
+            <div className="max-w-full sm:max-w-4xl mx-auto p-4 sm:p-6 mt-6 sm:mt-10 mb-10 sm:mb-20 flex-grow">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="space-y-6"
                 >
-                <h1 className="text-3xl font-bold text-gray-800">Checkout</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Checkout</h1>
 
-                {/* Resumen del carrito */}
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-4">Resumen de compra</h2>
-                    <div className="space-y-4">
-                        {cartItems.map((item) => (
-                            <div key={item.idProduct} className="flex justify-between items-center border-b pb-4">
-                                <div>
-                                    <p className="font-semibold text-gray-800">{item.productName}</p>
-                                    <p className="text-sm text-gray-600">Cantidad: {item.quantity}</p>
+                    {/* Resumen del carrito */}
+                    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Resumen de compra</h2>
+                        <div className="space-y-4">
+                            {cartItems.map((item) => (
+                                <div key={item.idProduct} className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <p className="font-semibold text-gray-800 text-sm sm:text-base">{item.productName}</p>
+                                        <p className="text-xs sm:text-sm text-gray-600">Cantidad: {item.quantity}</p>
+                                    </div>
+                                    <p className="font-semibold text-sm sm:text-base">
+                                        ${new Intl.NumberFormat('es-CO').format(item.productPrice * item.quantity)}
+                                    </p>
                                 </div>
-                                <p className="font-semibold">
-                                    ${new Intl.NumberFormat('es-CO').format(item.productPrice * item.quantity)}
-                                </p>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                        <div className="mt-6 pt-6 border-t-2 flex justify-between text-base sm:text-lg font-bold">
+                            <span>Total</span>
+                            <span className="text-lime-600">${new Intl.NumberFormat('es-CO').format(totalPrice)}</span>
+                        </div>
                     </div>
-                    <div className="mt-6 pt-6 border-t-2 flex justify-between text-lg font-bold">
-                        <span>Total</span>
-                        <span className="text-lime-600">${new Intl.NumberFormat('es-CO').format(totalPrice)}</span>
-                    </div>
-                </div>
 
-                {/* Botones */}
-                <div className="flex gap-4">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="flex-1 bg-gray-300 text-gray-800 py-3 rounded-lg hover:bg-gray-400 transition"
-                    >
-                        Seguir comprando
-                    </button>
-                    <button
-                        className="flex-1 bg-lime-600 text-white py-3 rounded-lg hover:bg-lime-700 transition font-semibold"
-                    >
-                        Procesar pago
-                    </button>
-                </div>
+                    {/* Botones */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="flex-1 bg-gray-300 text-gray-800 py-3 rounded-lg hover:bg-gray-400 transition"
+                        >
+                            Seguir comprando
+                        </button>
+                        <button
+                            className="flex-1 bg-lime-600 text-white py-3 rounded-lg hover:bg-lime-700 transition font-semibold"
+                        >
+                            Procesar pago
+                        </button>
+                    </div>
                 </motion.div>
             </div>
             <div className="mt-auto">

@@ -1,12 +1,11 @@
 @import "tailwindcss";
 
-html {
-    
-}
+html {}
+
 body {
     background-color: #f4f4f4;
     font-family: Trueno;
-    
+
 }
 
 .start-navbar {
@@ -20,6 +19,7 @@ body {
 .successMessage {
     animation: fadeOut 1s ease-in-out 4s forwards;
 }
+
 @font-face {
     font-family: 'Trueno';
     src: url('./assets/fonts/TruenoRoundBd.woff2') format('woff2'),
@@ -48,13 +48,33 @@ body {
 }
 
 @keyframes progressBar {
-    from { width: 0%; }
-    to { width: 100%; }
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
 }
 
 @keyframes fadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

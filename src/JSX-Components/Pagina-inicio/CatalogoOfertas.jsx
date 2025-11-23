@@ -49,7 +49,7 @@ const CatalogoOfertas = () => {
             <h1 className="text-3xl font-bold text-center mb-6">Ofertas del día</h1>
             {loading && <p>Cargando productos...</p>}
             {error && <p>Hubo un error al obtener los productos</p>}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 {products.map((product) => (
                     <ProductCardInicio
                         key={product.idProduct}

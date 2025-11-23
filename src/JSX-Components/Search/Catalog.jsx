@@ -18,8 +18,8 @@ export default function Catalog() {
 
     return (
         <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 80px)' }}>
-            <div className="flex justify-center py-10 flex-grow">
-                <div className="flex flex-col lg:flex-row max-w-[90%] lg:max-w-[75%] w-full gap-6">
+            <div className="flex justify-center py-6 sm:py-10 flex-grow px-4">
+                <div className="flex flex-col lg:flex-row max-w-full lg:max-w-[90%] xl:max-w-[75%] w-full gap-4 sm:gap-6">
                     {/* Barra lateral de filtros */}
                     <div className="w-full lg:w-1/4">
                         <ProductsFilter onFilterChange={handleFilterChange} />
@@ -27,9 +27,9 @@ export default function Catalog() {
                     {/* Contenido principal */}
                     <div className="w-full lg:w-3/4">
                         {/* Lista de productos */}
-                        <ListProducts 
-                            filters={filters} 
-                            searchTerm={searchTerm} 
+                        <ListProducts
+                            filters={filters}
+                            searchTerm={searchTerm}
                             setSearchTerm={setSearchTerm} // Se pasa la función para actualizar el searchTerm
                         />
                     </div>

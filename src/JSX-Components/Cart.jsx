@@ -47,7 +47,7 @@ export default function Cart() {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-                        className="fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-100 flex flex-col"
+                        className="fixed right-0 top-0 h-screen w-full sm:max-w-md bg-white shadow-2xl z-100 flex flex-col"
                     >
                         {/* Header del carrito */}
                         <div className="bg-gray-600 text-white p-6 flex items-center justify-between">
@@ -154,11 +154,10 @@ export default function Cart() {
                                                     whileHover={{ scale: 1.1 }}
                                                     whileTap={{ scale: 0.95 }}
                                                     onClick={() => removeFromCart(item.idProduct)}
-                                                    className={`p-2 rounded transition-colors ${
-                                                        hoveredItemId === item.idProduct
+                                                    className={`p-2 rounded transition-colors ${hoveredItemId === item.idProduct
                                                             ? 'bg-red-100 text-red-600'
                                                             : 'text-gray-400 hover:text-red-600'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <FaTrash className="h-4 w-4" />
                                                 </motion.button>

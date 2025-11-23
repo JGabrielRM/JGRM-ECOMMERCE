@@ -26,23 +26,24 @@ import ConfigurarPerfil from './JSX-Components/Profile/ConfigurarPerfil.jsx';
 import IniciarSesionExitoso from './JSX-Components/InicioSesion/IniciarSesionExitoso.jsx';
 import HistorialCompras from './JSX-Components/Profile/HistorialCompras.jsx';
 import TwoFAAuth from './JSX-Components/InicioSesion/TwoFAAuth.jsx';
+import SessionRevoked from './JSX-Components/Security/SessionRevoked.jsx';
 
 
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
-    
+
     if (loading) {
         return <LoadingScreen />;
     }
-    
+
     return isAuthenticated() ? children : <Navigate to="/log-in" />;
 };
 
 export default function App() {
     const location = useLocation();
 
-    const showNavBarAndFooter = !['log-in', 'register', 'verify-code', 'forgot-password', 'reset-password', 'registro-exitoso', 'success', 'configurar-2fa'].includes(
+    const showNavBarAndFooter = !['log-in', 'register', 'verify-code', 'forgot-password', 'reset-password', 'registro-exitoso', 'success', 'configurar-2fa', 'session-revoked'].includes(
         location.pathname.split('/').pop()
     );
 
@@ -80,6 +81,7 @@ export default function App() {
                         <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
                         <Route path="/profile" element={<PrivateRoute><ConfigurarPerfil /></PrivateRoute>} />
                         <Route path="/historial-compras" element={<PrivateRoute><HistorialCompras /></PrivateRoute>} />
+                        <Route path="/security/session-revoked" element={<SessionRevoked />} />
                         <Route path="*" element={<PageNotFound />} />
                     </Routes>
                     {showNavBarAndFooter && !hasOwnFooter && <Footer />}

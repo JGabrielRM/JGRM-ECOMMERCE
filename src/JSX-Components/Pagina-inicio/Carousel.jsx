@@ -5,16 +5,16 @@ import '../../index.css';
 
 export default function NavigationSlide({ slides, currentIndex, setCurrentIndex }) {
     return (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 sm:space-x-3">
             {slides.map((_, index) => (
                 <div
                     key={index}
-                    className="relative h-2 w-20 rounded-full bg-gray-500 cursor-pointer"
+                    className="relative h-2 w-12 sm:w-20 rounded-full bg-gray-500 cursor-pointer"
                     onClick={() => setCurrentIndex(index)}
                 >
                     {currentIndex === index && (
                         <div className="absolute top-0 left-0 h-full w-full rounded-full  ">
-                            <div className="h-full rounded-full bg-white " 
+                            <div className="h-full rounded-full bg-white "
                                 style={{
                                     animation: "progressBar 10s ease-in-out forwards"
                                 }}
@@ -36,9 +36,9 @@ export function Carousel({ slides }) {
     const goToPrevious = () => {
         if (isTransitioning) return;
         setIsTransitioning(true);
-        
+
         setCurrentIndex(currentIndex === 0 ? slides.length - 1 : currentIndex - 1);
-        
+
         setTimeout(() => {
             setIsTransitioning(false);
         }, 500);
@@ -47,9 +47,9 @@ export function Carousel({ slides }) {
     const goToNext = () => {
         if (isTransitioning) return;
         setIsTransitioning(true);
-        
+
         setCurrentIndex(currentIndex === slides.length - 1 ? 0 : currentIndex + 1);
-        
+
         setTimeout(() => {
             setIsTransitioning(false);
         }, 500);
@@ -60,13 +60,13 @@ export function Carousel({ slides }) {
         const slideInterval = setInterval(() => {
             setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
         }, 10000);
-    
+
         return () => clearInterval(slideInterval);
     }, []);
 
     return (
-        <div className="relative w-full h-170 overflow-hidden">
-            <div 
+        <div className="relative w-full h-64 sm:h-96 md:h-[28rem] lg:h-170 overflow-hidden">
+            <div
                 className="flex h-full transition-transform duration-500 ease-in-out"
                 style={{
                     transform: `translateX(-${currentIndex * 100}%)`,
@@ -77,23 +77,23 @@ export function Carousel({ slides }) {
                         key={index}
                         className="w-full h-full flex-shrink-0 flex items-center"
                     >
-                        <img 
-                            src={slide.image} 
+                        <img
+                            src={slide.image}
                             alt={slide.alt}
-                            className="w-full h-full object-cover" 
+                            className="w-full h-full object-cover"
                         />
                     </div>
                 ))}
             </div>
-        
+
             <NavigationSlide slides={slides} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} />
 
-            <div className="absolute top-0 h-full w-full flex justify-between items-center px-10">
-                <button onClick={goToPrevious} disabled={isTransitioning} className="bg-gray-400/40 backdrop-blur-md text-white p-2 rounded-full transform active:scale-90 duration-300 hover:scale-110">
-                    <IoIosArrowBack className="h-12 w-12" />
+            <div className="absolute top-0 h-full w-full flex justify-between items-center px-2 sm:px-10">
+                <button onClick={goToPrevious} disabled={isTransitioning} className="bg-gray-400/40 backdrop-blur-md text-white p-1 sm:p-2 rounded-full transform active:scale-90 duration-300 hover:scale-110">
+                    <IoIosArrowBack className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12" />
                 </button>
-                <button onClick={goToNext} disabled={isTransitioning} className="bg-gray-400/40 backdrop-blur-md text-white p-2 rounded-full transform active:scale-90 duration-300 hover:scale-110">
-                    <IoIosArrowForward className="h-12 w-12" />
+                <button onClick={goToNext} disabled={isTransitioning} className="bg-gray-400/40 backdrop-blur-md text-white p-1 sm:p-2 rounded-full transform active:scale-90 duration-300 hover:scale-110">
+                    <IoIosArrowForward className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12" />
                 </button>
             </div>
         </div>
